@@ -44,10 +44,11 @@
         input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
         textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; resize: vertical; min-height: 60px; max-height: 150px; }
         .score-descriptor { font-size: 11px; color: #999; font-style: italic; margin-top: 3px; display: block; max-width: 250px; }
-        .score-select-wrapper { position: relative; display: inline-block; width: 100%; }
-        .score-select-wrapper select { position: relative; z-index: 1; }
-        .score-tooltip { position: absolute; bottom: 100%; left: 0; background: #333; color: white; padding: 8px 12px; border-radius: 4px; font-size: 11px; white-space: nowrap; margin-bottom: 5px; z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-        .score-select-wrapper:hover .score-tooltip { opacity: 1; }
+        .score-descriptor-box { background: #f5f5f5; border-left: 3px solid #667eea; padding: 8px 12px; margin-top: 8px; border-radius: 4px; font-size: 12px; color: #666; display: inline-block; }
+        .score-select-wrapper { position: relative; }
+        .score-tooltip { position: absolute; bottom: 100%; left: 0; background: #333; color: white; padding: 6px 10px; border-radius: 3px; font-size: 11px; white-space: nowrap; margin-bottom: 3px; z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .score-select-wrapper select:hover ~ .score-tooltip { opacity: 1; }
+        .score-select-wrapper select option:hover::after { content: attr(data-tooltip); }
         .priority-critical { background: #ffcdd2; color: #c62828; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
         .priority-high { background: #ffe0b2; color: #e65100; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
         .priority-medium { background: #fff9c4; color: #f57f17; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
@@ -70,6 +71,8 @@
         .btn-delete { background: #f44336; color: white; }
         .btn-download { background: #2196F3; color: white; }
         .btn-view { background: #667eea; color: white; }
+        .btn-download-xlsx { background: #ff9800; color: white; }
+        .btn-export-sheets { background: #34a853; color: white; }
         .dashboard-selector { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .dashboard-selector select { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; max-width: 300px; }
         @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } .charts-grid { grid-template-columns: 1fr; } th, td { padding: 8px 6px; font-size: 12px; } }
@@ -81,7 +84,7 @@
     <div class="container">
         <div class="header">
             <h1>🎰 B2B iGaming Platform Scorecard</h1>
-            <p>Совместное оценивание платформ. Каждая оценка сохраняется отдельно.</p>
+            <p>Профессиональный инструмент оценки платформ <strong>by Vlad Sh</strong></p>
         </div>
 
         <div class="tabs">
@@ -94,14 +97,14 @@
         <div id="evaluation" class="tab-content active">
             <div class="controls">
                 <div class="platform-input">
-                    <input type="text" id="evaluator-name" placeholder="Ваше имя/компания (например, John, Parimatch)" value="">
-                    <input type="text" id="platform-name" placeholder="Платформа (например, Platform A, Bet365)" value="">
+                    <input type="text" id="evaluator-name" placeholder="Your name (John, Parimatch, etc)">
+                    <input type="text" id="platform-name" placeholder="Platform (Platform A, Bet365)">
                     <button onclick="savePlatformEvaluation()" style="background: #4caf50;">💾 Save & Add to Comparison</button>
                 </div>
                 <button onclick="exportToExcel()">📥 Export Excel</button>
             </div>
 
-            <div class="info-box">💾 Каждое "Save & Add to Comparison" сохраняет твою оценку с твоим именем. Потом можно сравнивать оценки разных людей.</div>
+            <div class="info-box">💾 Каждое "Save & Add to Comparison" сохраняет твою оценку с твоим именем для последующего сравнения.</div>
 
             <div class="evaluation-table">
                 <div class="table-wrapper">
@@ -116,9 +119,9 @@
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content">
             <div class="dashboard-selector">
-                <label>Выбери оценку для анализа:</label>
+                <label>Choose evaluation:</label>
                 <select onchange="switchDashboardPlatform(this.value)" id="dashboard-selector">
-                    <option value="">-- Выбрать --</option>
+                    <option value="">-- Select --</option>
                 </select>
             </div>
 
@@ -146,7 +149,7 @@
 
         <!-- Comparison Tab -->
         <div id="comparison" class="tab-content">
-            <div class="info-box">Все сохраненные оценки появляются здесь. Сравнивай разные версии и оценивающих.</div>
+            <div class="info-box">Все сохраненные оценки. Сравнивай разные версии и оценивающих.</div>
             <div id="evaluations-list"></div>
         </div>
     </div>
@@ -155,79 +158,79 @@
         const scoreDescriptors = {
             "Core flows stability": { 1: "Множество ошибок", 2: "Часто ошибки", 3: "Редко", 4: "Стабильно", 5: "Идеально" },
             "Mirror rotation": { 1: "Нет ротации", 2: "Нестабильно", 3: "С задержками", 4: "Хорошо", 5: "Идеально" },
-            "Session persistence": { 1: "Теряется", 2: "Часто теряется", 3: "Иногда", 4: "Обычно", 5: "Всегда" },
+            "Session persistence": { 1: "Теряется", 2: "Часто", 3: "Иногда", 4: "Обычно", 5: "Всегда" },
             "Frontend performance": { 1: ">5s", 2: "4-5s", 3: "3-4s", 4: "<3s", 5: "<2s" }
         };
 
         const criteria = {
             "1. Стабильность работы": [
-                { name: "Core flows stability", desc: "Нет блокирующих ошибок", priority: "Critical", weight: 5 },
-                { name: "Mirror rotation", desc: "Автоматическая ротация зеркал", priority: "Critical", weight: 5 },
-                { name: "Session persistence", desc: "Сессия при переходе", priority: "High", weight: 4 },
-                { name: "Frontend performance", desc: "Загрузка <3s", priority: "High", weight: 4 },
-                { name: "Mobile scenarios", desc: "На мобильных", priority: "High", weight: 4 },
-                { name: "Game providers", desc: "Основные провайдеры", priority: "High", weight: 4 },
-                { name: "Bonus accuracy", desc: "Начисление бонусов", priority: "Critical", weight: 5 }
+                { name: "Core flows stability", desc: "Нет блокирующих ошибок в core flows: регистрация, login, deposit, withdrawal, game launch, bonus activation", priority: "Critical", weight: 5 },
+                { name: "Mirror rotation", desc: "Автоматическая ротация зеркал без потери сессии и данных юзера", priority: "Critical", weight: 5 },
+                { name: "Session persistence", desc: "Сессия сохраняется при переходе между доменами и зеркалами", priority: "High", weight: 4 },
+                { name: "Frontend performance", desc: "Быстрая загрузка main pages <3s на desktop и <5s на mobile", priority: "High", weight: 4 },
+                { name: "Mobile scenarios", desc: "Полная функциональность на мобильных браузерах (iOS Safari, Chrome Mobile)", priority: "High", weight: 4 },
+                { name: "Game providers", desc: "Интеграция с основными провайдерами: Pragmatic, NetEnt, Evolution, Microgaming", priority: "High", weight: 4 },
+                { name: "Bonus accuracy", desc: "Точное начисление бонусов, вейджер, FS без ошибок в расчетах", priority: "Critical", weight: 5 }
             ],
             "2. Платежи": [
-                { name: "Card payment UI", desc: "Собственный UI", priority: "Critical", weight: 5 },
-                { name: "Player data mapping", desc: "Маппирование данных", priority: "Critical", weight: 5 },
-                { name: "Fallback routing", desc: "При отказе платежа", priority: "High", weight: 4 },
-                { name: "Open Banking", desc: "≥5 провайдеров", priority: "High", weight: 4 },
-                { name: "Retry on failure", desc: "Альтернативные методы", priority: "Medium", weight: 3 },
-                { name: "1-Click return", desc: "Возврат 1-Click", priority: "Medium", weight: 3 }
+                { name: "Card payment UI", desc: "Собственный кастомный UI для карточных платежей без redirect на провайдера", priority: "Critical", weight: 5 },
+                { name: "Player data mapping", desc: "Правильное маппирование данных юзера (имя, адрес, DOB) в платежные системы", priority: "Critical", weight: 5 },
+                { name: "Fallback routing", desc: "Fallback routing при отказе платежа: автоматический выбор альтернативного провайдера", priority: "High", weight: 4 },
+                { name: "Open Banking", desc: "Поддержка Open Banking / Bank Transfers: ≥5 провайдеров интеграции", priority: "High", weight: 4 },
+                { name: "Retry on failure", desc: "Возможность повтора платежа при ошибке, сохранение истории попыток", priority: "Medium", weight: 3 },
+                { name: "1-Click return", desc: "Возврат средств через 1-Click без дополнительных подтверждений (где позволяет регуляция)", priority: "Medium", weight: 3 }
             ],
             "3. Главная страница": [
-                { name: "Block configuration", desc: "Через CMS", priority: "High", weight: 4 },
-                { name: "Content segmentation", desc: "Разный контент", priority: "High", weight: 4 },
-                { name: "Personalization", desc: "По user attributes", priority: "Medium", weight: 3 },
-                { name: "Localization", desc: "Без изменения кода", priority: "High", weight: 4 }
+                { name: "Block configuration", desc: "Конфигурирование блоков через CMS без изменения кода: игры, баннеры, промо", priority: "High", weight: 4 },
+                { name: "Content segmentation", desc: "Разный контент для разных юзеров: VIP, новых, лояльных, по геолокации", priority: "High", weight: 4 },
+                { name: "Personalization", desc: "Персонализация по user attributes: история, поведение, язык, валюта", priority: "Medium", weight: 3 },
+                { name: "Localization", desc: "Полная локализация без изменения фронтенд-кода: язык, формат дат, валюта", priority: "High", weight: 4 }
             ],
             "4. Форма регистрации": [
-                { name: "Traffic customization", desc: "Под источники", priority: "High", weight: 4 },
-                { name: "Third-party compat", desc: "На сторонних", priority: "Medium", weight: 3 },
-                { name: "Format flexibility", desc: "Разные форматы", priority: "Medium", weight: 3 },
-                { name: "Post-reg upsell", desc: "Апсейл", priority: "Medium", weight: 3 }
+                { name: "Traffic customization", desc: "Кастомизация формы под разные трафик-источники: landing pages, affiliate, SMS", priority: "High", weight: 4 },
+                { name: "Third-party compat", desc: "Работа на сторонних доменах и сайтах через embed/iframe", priority: "Medium", weight: 3 },
+                { name: "Format flexibility", desc: "Поддержка разных форматов: быстрая регистрация (email only), полная форма, социальные сети", priority: "Medium", weight: 3 },
+                { name: "Post-reg upsell", desc: "Апсейл возможности: Deposit, Play, Bonus на экранах после регистрации", priority: "Medium", weight: 3 }
             ],
             "5. Кассир": [
-                { name: "Product communications", desc: "Коммуникации", priority: "High", weight: 4 },
-                { name: "UX streamlining", desc: "Без лишних этапов", priority: "High", weight: 4 },
-                { name: "Withdrawal clarity", desc: "Условия вывода", priority: "High", weight: 4 },
-                { name: "KYC flow", desc: "KYC процесс", priority: "High", weight: 4 },
-                { name: "Support integration", desc: "Саппорт", priority: "Medium", weight: 3 }
+                { name: "Product communications", desc: "Понятные коммуникации о комиссиях, ограничениях, сроках по каждому методу", priority: "High", weight: 4 },
+                { name: "UX streamlining", desc: "Минимум этапов: deposit за 1 клик, saved cards, mobile wallets", priority: "High", weight: 4 },
+                { name: "Withdrawal clarity", desc: "Ясные условия вывода: минимум, максимум, комиссия, сроки обработки", priority: "High", weight: 4 },
+                { name: "KYC flow", desc: "Простой KYC процесс: требуемые документы, быстрая проверка, апсейлы при лимитах", priority: "High", weight: 4 },
+                { name: "Support integration", desc: "Интеграция с саппортом: чат, tickets для помощи с платежами", priority: "Medium", weight: 3 }
             ],
             "6. Ивенты и трекинг": [
-                { name: "Event catalog", desc: "Каталог events", priority: "Critical", weight: 5 },
-                { name: "Delay config", desc: "Настройка задержки", priority: "Medium", weight: 3 },
-                { name: "Real-time delivery", desc: "Минимальная задержка", priority: "High", weight: 4 },
-                { name: "Event-driven flows", desc: "Для UI", priority: "High", weight: 4 },
-                { name: "Frontend tracking", desc: "Разметка", priority: "High", weight: 4 },
-                { name: "Event segmentation", desc: "Сегментация", priority: "Medium", weight: 3 }
+                { name: "Event catalog", desc: "Полный каталог трекируемых events: регистрация, login, deposit, game play, bonus, withdrawal", priority: "Critical", weight: 5 },
+                { name: "Delay config", desc: "Настройка задержки доставки events для аналитики: real-time, 1 минута, 1 час", priority: "Medium", weight: 3 },
+                { name: "Real-time delivery", desc: "Минимальная задержка доставки events в аналитику: <1 сек для критических events", priority: "High", weight: 4 },
+                { name: "Event-driven flows", desc: "Event-driven архитектура UI: обновления основаны на server events, не на polling", priority: "High", weight: 4 },
+                { name: "Frontend tracking", desc: "Полная разметка фронтенда: клики, фреймворк events, ошибки JavaScript", priority: "High", weight: 4 },
+                { name: "Event segmentation", desc: "Сегментация events: по типу юзера, по игре, по стране, по источнику", priority: "Medium", weight: 3 }
             ],
             "7. Аналитика": [
-                { name: "Analytics coverage", desc: "Все funnels", priority: "High", weight: 4 },
-                { name: "Custom events", desc: "Custom events", priority: "Medium", weight: 3 },
-                { name: "Cohort analysis", desc: "Для когорт", priority: "Medium", weight: 3 },
-                { name: "Revenue attribution", desc: "Tracking revenue", priority: "High", weight: 4 }
+                { name: "Analytics coverage", desc: "Покрытие всех funnels: регистрация, deposit, game play, retention, reactivation", priority: "High", weight: 4 },
+                { name: "Custom events", desc: "Возможность создавать custom events для специфических бизнес-метрик", priority: "Medium", weight: 3 },
+                { name: "Cohort analysis", desc: "Встроенные возможности для когорт-анализа: retention, LTV по когортам", priority: "Medium", weight: 3 },
+                { name: "Revenue attribution", desc: "Tracking revenue: source attribution, first touch vs last touch, contribution margin", priority: "High", weight: 4 }
             ],
             "8. Бонусный инструментарий": [
-                { name: "Bonus clarity", desc: "Условия wagering", priority: "High", weight: 4 },
-                { name: "Game search", desc: "Поиск игр", priority: "Medium", weight: 3 },
-                { name: "Multi-stage", desc: "Multi-stage", priority: "High", weight: 4 },
-                { name: "Bonus cancellation", desc: "Отмена", priority: "High", weight: 4 },
-                { name: "FS crediting", desc: "Зачисление FS", priority: "High", weight: 4 },
-                { name: "Multi-bonus stack", desc: "Наложение", priority: "Medium", weight: 3 }
+                { name: "Bonus clarity", desc: "Ясные условия wagering: требуемый оборот, eligible games, сроки истечения", priority: "High", weight: 4 },
+                { name: "Game search", desc: "Фильтр и поиск игр: по провайдеру, типу (слоты, столы), по названию, популярности", priority: "Medium", weight: 3 },
+                { name: "Multi-stage", desc: "Multi-stage бонусы: раскрытие условий по этапам, прогресс-бар", priority: "High", weight: 4 },
+                { name: "Bonus cancellation", desc: "Возможность отмены бонуса: явная кнопка отмены, сохранение funds отдельно", priority: "High", weight: 4 },
+                { name: "FS crediting", desc: "Различные варианты зачисления FS: сразу в игру, в кошелек, поэтапно", priority: "High", weight: 4 },
+                { name: "Multi-bonus stack", desc: "Поддержка наложения бонусов: несколько активных бонусов одновременно, правильные расчеты", priority: "Medium", weight: 3 }
             ],
             "9. Программа лояльности": [
-                { name: "Loyalty area", desc: "Единое место", priority: "High", weight: 4 },
-                { name: "Rewards variety", desc: "Регулярные", priority: "High", weight: 4 },
-                { name: "Notifications", desc: "Уведомления", priority: "Medium", weight: 3 }
+                { name: "Loyalty area", desc: "Единое место для лояльности: VIP status, тир-прогрессия, rewards, персональные предложения", priority: "High", weight: 4 },
+                { name: "Rewards variety", desc: "Разнообразие rewards: бонусы, cashback, FS, перки, эксклюзивные события", priority: "High", weight: 4 },
+                { name: "Notifications", desc: "Своевременные уведомления: tier progression, rewards, персональные предложения, опционально push", priority: "Medium", weight: 3 }
             ],
             "10. Приложения": [
-                { name: "APK version", desc: "APK", priority: "Medium", weight: 3 },
-                { name: "PWA", desc: "PWA", priority: "Medium", weight: 3 },
-                { name: "iOS app", desc: "iOS", priority: "Medium", weight: 3 },
-                { name: "Push notifications", desc: "Push", priority: "Medium", weight: 3 }
+                { name: "APK version", desc: "Native APK приложение для Android: полная функциональность, push notifications", priority: "Medium", weight: 3 },
+                { name: "PWA", desc: "Progressive Web App: install как app, offline mode, push notifications", priority: "Medium", weight: 3 },
+                { name: "iOS app", desc: "Native iOS приложение или Web App в TestFlight: соответствие App Store гайдлайнам", priority: "Medium", weight: 3 },
+                { name: "Push notifications", desc: "Push уведомления: deposit reminders, game launches, promotions, правильная доставка", priority: "Medium", weight: 3 }
             ]
         };
 
@@ -252,7 +255,7 @@
             const platformName = document.getElementById("platform-name").value.trim() || "Platform 1";
             
             if (!evaluator || !platformName) {
-                alert("Заполни имя и платформу!");
+                alert("Fill in name and platform!");
                 return;
             }
 
@@ -275,7 +278,7 @@
 
         function updateDashboardSelector() {
             const selector = document.getElementById("dashboard-selector");
-            selector.innerHTML = '<option value="">-- Выбрать --</option>';
+            selector.innerHTML = '<option value="">-- Select --</option>';
             
             Object.keys(evaluations).forEach(key => {
                 const eval_data = evaluations[key];
@@ -312,7 +315,6 @@
                     sectionWeightTotal += item.weight;
 
                     const descriptor = scoreDescriptors[item.name]?.[score] || '';
-                    const tooltip = descriptor ? ` title="${descriptor}"` : '';
 
                     tbody.innerHTML += `
                         <tr>
@@ -322,17 +324,24 @@
                             <td><span style="background: ${item.priority === 'Critical' ? '#ffcdd2' : '#ffe0b2'}; color: ${item.priority === 'Critical' ? '#c62828' : '#e65100'}; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">${item.priority}</span></td>
                             <td>${item.weight}</td>
                             <td>
-                                <div class="score-select-wrapper">
-                                    <select onchange="updateEvalScore('${section}', ${idx}, this.value)"${tooltip}>
+                                <div class="score-select-wrapper" onmouseover="showScoreTooltips(this)" onmouseout="hideScoreTooltips(this)">
+                                    <select onchange="updateEvalScore('${section}', ${idx}, this.value)">
                                         <option value="0">—</option>
-                                        <option value="1" ${score === 1 ? 'selected' : ''}>1 - Плохо</option>
-                                        <option value="2" ${score === 2 ? 'selected' : ''}>2 - Слабо</option>
-                                        <option value="3" ${score === 3 ? 'selected' : ''}>3 - Среднее</option>
-                                        <option value="4" ${score === 4 ? 'selected' : ''}>4 - Хорошо</option>
-                                        <option value="5" ${score === 5 ? 'selected' : ''}>5 - Отлично</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
                                     </select>
-                                    ${descriptor ? `<div class="score-tooltip">${descriptor}</div>` : ''}
+                                    <div class="score-tooltip" style="display:none;">
+                                        <div>1: ${scoreDescriptors[item.name]?.[1]}</div>
+                                        <div>2: ${scoreDescriptors[item.name]?.[2]}</div>
+                                        <div>3: ${scoreDescriptors[item.name]?.[3]}</div>
+                                        <div>4: ${scoreDescriptors[item.name]?.[4]}</div>
+                                        <div>5: ${scoreDescriptors[item.name]?.[5]}</div>
+                                    </div>
                                 </div>
+                                ${descriptor ? `<div class="score-descriptor-box">${descriptor}</div>` : ''}
                             </td>
                             <td style="text-align: center;">${weighted}</td>
                             <td><textarea onchange="updateEvalComment('${section}', ${idx}, this.value)">${comment}</textarea></td>
@@ -352,6 +361,16 @@
                     </tr>
                 `;
             });
+        }
+
+        function showScoreTooltips(wrapper) {
+            const tooltip = wrapper.querySelector('.score-tooltip');
+            if (tooltip) tooltip.style.display = 'block';
+        }
+
+        function hideScoreTooltips(wrapper) {
+            const tooltip = wrapper.querySelector('.score-tooltip');
+            if (tooltip) tooltip.style.display = 'none';
         }
 
         function updateEvalScore(section, idx, value) {
@@ -436,7 +455,7 @@
                         <div style="flex: 1; margin: 0 15px; background: #eee; border-radius: 4px; height: 8px;">
                             <div style="width: ${barWidth}%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);"></div>
                         </div>
-                        <div class="section-score-value" title="Score: ${data.score.toFixed(2)}, Weighted: ${data.weighted}">${data.score.toFixed(2)}</div>
+                        <div class="section-score-value">${data.score.toFixed(2)}</div>
                         <div style="min-width: 80px; text-align: right; font-size: 11px; color: #999;">W: ${data.weighted}</div>
                     </div>
                 `;
@@ -476,7 +495,7 @@
         function renderComparisonTab() {
             const container = document.getElementById("evaluations-list");
             if (Object.keys(evaluations).length === 0) {
-                container.innerHTML = '<div class="info-box">Пока нет сохраненных оценок. Сначала заполни и сохрани оценку.</div>';
+                container.innerHTML = '<div class="info-box">No saved evaluations yet. Fill in and save an evaluation first.</div>';
                 return;
             }
 
@@ -492,7 +511,8 @@
                         <div class="evaluation-item-score">${overall.toFixed(2)}</div>
                         <div class="evaluation-item-actions">
                             <button class="btn-view" onclick="viewEvaluation('${key}')">View</button>
-                            <button class="btn-download" onclick="downloadEvaluation('${key}')">📥</button>
+                            <button class="btn-download" onclick="downloadEvaluationExcel('${key}')">📥 Excel</button>
+                            <button class="btn-export-sheets" onclick="exportToGoogleSheets('${key}')">📊 Sheets</button>
                             <button class="btn-delete" onclick="deleteEvaluation('${key}')">Delete</button>
                         </div>
                     </div>
@@ -521,7 +541,7 @@
         }
 
         function deleteEvaluation(key) {
-            if (confirm("Удалить эту оценку?")) {
+            if (confirm("Delete this evaluation?")) {
                 delete evaluations[key];
                 saveToLocalStorage();
                 updateDashboardSelector();
@@ -530,22 +550,27 @@
             }
         }
 
-        function downloadEvaluation(key) {
+        function downloadEvaluationExcel(key) {
             const eval_data = evaluations[key];
             const wb = XLSX.utils.book_new();
             
-            const data = [["Section", "Criterion", "Score", "Weighted Score", "Comment"]];
+            const data = [["Section", "Criterion", "Score", "Weighted Score", "Weight", "Comment"]];
             Object.entries(criteria).forEach(([section, items]) => {
                 items.forEach((item, idx) => {
                     const score = eval_data.data[section]?.[idx]?.score || 0;
                     const comment = eval_data.data[section]?.[idx]?.comment || "";
-                    data.push([section, item.name, score, (score * item.weight).toFixed(2), comment]);
+                    data.push([section, item.name, score, (score * item.weight).toFixed(2), item.weight, comment]);
                 });
             });
 
             const ws = XLSX.utils.aoa_to_sheet(data);
             XLSX.utils.book_append_sheet(wb, ws, "Evaluation");
             XLSX.writeFile(wb, `${eval_data.platform}_${eval_data.evaluator}.xlsx`);
+        }
+
+        function exportToGoogleSheets(key) {
+            const eval_data = evaluations[key];
+            alert(`📊 Google Sheets Export\n\nTo export to Google Sheets:\n\n1. Create a new Google Sheet\n2. Copy the data from "Download Excel" or manually enter it\n3. Share the link for team collaboration\n\nAlternatively, use the Google Sheets API for automated integration.`);
         }
 
         function exportToExcel() {
