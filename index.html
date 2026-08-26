@@ -146,8 +146,8 @@
             </div>
 
             <div id="kpi-container" class="dashboard">
-                <div class="kpi-card"><div class="kpi-label">Overall Weighted Score</div><div class="kpi-value" id="overall-weighted-score" style="color: #667eea; font-weight: 700;">0.00</div></div>
-                <div class="kpi-card"><div class="kpi-label">Overall Score</div><div class="kpi-value" id="overall-score" style="color: #999; font-weight: 400;">0.00</div></div>
+                <div class="kpi-card"><div class="kpi-label">Avg Weighted Score</div><div class="kpi-value" id="overall-weighted-score" style="color: #667eea; font-weight: 700;">0.00</div></div>
+                <div class="kpi-card"><div class="kpi-label">Avg Score</div><div class="kpi-value" id="overall-score" style="color: #999; font-weight: 400;">0.00</div></div>
                 <div class="kpi-card"><div class="kpi-label">Critical Gaps</div><div class="kpi-value" id="critical-gaps">0</div></div>
                 <div class="kpi-card"><div class="kpi-label">Strong Points</div><div class="kpi-value" id="strong-points">0</div></div>
             </div>
@@ -159,10 +159,6 @@
                 <div class="stat-item"><div class="stat-value" id="stat-weak">0</div><div style="font-size: 12px; color: #999; margin-top: 5px;">Weak (1-2)</div></div>
             </div>
 
-            <div class="charts-grid">
-                <div class="chart-container"><canvas id="radarChart"></canvas></div>
-                <div class="chart-container"><canvas id="barChart"></canvas></div>
-            </div>
 
             <div class="section-scores" id="section-scores-container"></div>
         </div>
@@ -608,7 +604,7 @@
                 <div style="display: flex; justify-content: space-between; padding: 0 10px; margin-bottom: 10px; font-weight: 600; font-size: 12px; color: #999;">
                     <div>Section</div>
                     <div style="flex: 1; margin: 0 15px;"></div>
-                    <div style="min-width: 80px; text-align: right; color: #999;">Overall Score</div>
+                    <div style="min-width: 80px; text-align: right; color: #999;">Avg Score</div>
                     <div style="min-width: 100px; text-align: right; color: #667eea;">Overall Weighted</div>
                 </div>
             `;
@@ -671,7 +667,7 @@
                 container.innerHTML += `
                     <div class="evaluation-item" style="align-items: flex-start;">
                         <input type="checkbox" id="check-${key}" value="${key}" style="margin-top: 5px; cursor: pointer;">
-                        <div style="flex: 1;">
+                        <div style="flex: 1; margin-left: 12px;">
                             <div class="evaluation-item-name">${eval_data.platform}</div>
                             <div style="font-size: 12px; color: #999;">${eval_data.evaluator} • ${eval_data.timestamp}</div>
                         </div>
@@ -745,7 +741,7 @@
 
             const resultContainer = document.getElementById('comparison-result');
             let html = `<div class="comparison-result">
-                <h3 style="margin-bottom: 15px; color: #667eea;">Сравнение по Section Scores</h3>
+                <h3 style="margin-bottom: 15px; color: #667eea;">Сравнение по Avg Weighted Score</h3>
                 <table class="comparison-table">
                     <thead><tr><th style="color: #333;">Раздел</th>`;
 
@@ -829,11 +825,11 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
                         <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center;">
                             <div style="font-size: 28px; font-weight: bold; color: #667eea;">${overallWeighted.toFixed(2)}</div>
-                            <div style="font-size: 12px; color: #333; margin-top: 5px; font-weight: 600;">Overall Weighted Score</div>
+                            <div style="font-size: 12px; color: #333; margin-top: 5px; font-weight: 600;">Avg Weighted Score</div>
                         </div>
                         <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center;">
                             <div style="font-size: 28px; font-weight: normal; color: #999;">${overall.toFixed(2)}</div>
-                            <div style="font-size: 12px; color: #999; margin-top: 5px;">Overall Score</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 5px;">Avg Score</div>
                         </div>
                         <div style="background: #ffebee; padding: 15px; border-radius: 8px; text-align: center;">
                             <div style="font-size: 28px; font-weight: bold; color: #f44336;">${criticalGaps}</div>
@@ -861,6 +857,15 @@
             });
 
             const sorted = Object.entries(sectionScores).sort((a, b) => b[1].score - a[1].score);
+
+            // Add header row
+            html += `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; margin-top: 15px;">
+                    <div style="font-size: 12px; font-weight: 600; color: #999;">Section</div>
+                    <div style="font-size: 12px; font-weight: 600; color: #667eea;">Avg Weighted Score</div>
+                </div>
+            `;
+
             sorted.forEach(([section, data]) => {
                 const barWidth = (data.score / 5) * 100;
                 html += `
