@@ -511,23 +511,19 @@
             currentEvaluation[section][idx].comment = value;
         }
 
-        // Средняя оценка по всем секциям (простая средняя без весов)
+        // Средняя оценка по ВСЕМ 65 критериям (простая средняя без весов)
         function calculateOverallScore() {
-            let sectionScores = [];
+            let totalScore = 0, scoreCount = 0;
             Object.entries(criteria).forEach(([section, items]) => {
-                let sectionTotal = 0, sectionCount = 0;
                 items.forEach((item, idx) => {
                     const score = currentEvaluation[section]?.[idx]?.score || 0;
                     if (score > 0) {
-                        sectionTotal += score;
-                        sectionCount++;
+                        totalScore += score;
+                        scoreCount++;
                     }
                 });
-                if (sectionCount > 0) {
-                    sectionScores.push(sectionTotal / sectionCount);
-                }
             });
-            return sectionScores.length > 0 ? (sectionScores.reduce((a, b) => a + b, 0) / sectionScores.length) : 0;
+            return scoreCount > 0 ? (totalScore / scoreCount) : 0;
         }
 
         // Взвешенная оценка по всем секциям (среднее взвешенных оценок)
@@ -607,7 +603,15 @@
 
             const sorted = Object.entries(sectionScores).sort((a, b) => b[1].weighted - a[1].weighted);
 
-            container.innerHTML = "<div style='font-weight: 600; margin-bottom: 15px; color: #667eea;'>Section Scores (Ranked)</div>";
+            container.innerHTML = `
+                <div style='font-weight: 600; margin-bottom: 15px; color: #667eea;'>Section Scores (Ranked)</div>
+                <div style="display: flex; justify-content: space-between; padding: 0 10px; margin-bottom: 10px; font-weight: 600; font-size: 12px; color: #999;">
+                    <div>Section</div>
+                    <div style="flex: 1; margin: 0 15px;"></div>
+                    <div style="min-width: 80px; text-align: right; color: #999;">Overall Score</div>
+                    <div style="min-width: 100px; text-align: right; color: #667eea;">Overall Weighted</div>
+                </div>
+            `;
             sorted.forEach(([section, data]) => {
                 const barWidth = (data.weighted / 5) * 100;
                 container.innerHTML += `
@@ -616,8 +620,8 @@
                         <div style="flex: 1; margin: 0 15px; background: #eee; border-radius: 4px; height: 8px;">
                             <div style="width: ${barWidth}%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);"></div>
                         </div>
-                        <div class="section-score-value" style="font-weight: 700; color: #667eea;">${data.weighted.toFixed(2)}</div>
-                        <div style="min-width: 80px; text-align: right; font-size: 11px; color: #999;">S: ${data.score.toFixed(2)}</div>
+                        <div style="min-width: 80px; text-align: right; font-size: 11px; color: #999;">${data.score.toFixed(2)}</div>
+                        <div class="section-score-value" style="font-weight: 700; color: #667eea; min-width: 100px; text-align: right;">${data.weighted.toFixed(2)}</div>
                     </div>
                 `;
             });
