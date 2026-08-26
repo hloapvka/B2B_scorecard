@@ -6,6 +6,8 @@
     <title>B2B iGaming Platform Scorecard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #333; }
@@ -121,6 +123,7 @@
                     <input type="text" id="platform-name" placeholder="Платформа (например, GR8)">
                     <button onclick="savePlatformEvaluation()" style="background: #4caf50;">💾 Save & Add to Comparison</button>
                 </div>
+                <button onclick="shareEvaluation()" style="background: #2196F3;">🔗 Share Link</button>
                 <button onclick="exportToExcel()">📥 Export Excel</button>
             </div>
 
@@ -911,7 +914,105 @@
             setTimeout(() => msg.classList.remove("show"), 2000);
         }
 
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1b4LFSeVB2cYXluxPivk7YYw4aQ8FWIo",
+            authDomain: "b2b-scorecard.firebaseapp.com",
+            databaseURL: "https://b2b-scorecard-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "b2b-scorecard",
+            storageBucket: "b2b-scorecard.firebasestorage.app",
+            messagingSenderId: "768265819928",
+            appId: "1:768265819928:web:d13605d6d3f7f75008706d"
+        };
+
+        let firebaseEnabled = false;
+        let db = null;
+
+        // Инициализация Firebase
+        try {
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                const app = firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                firebaseEnabled = true;
+            }
+        } catch (e) {
+            console.log("Firebase not configured - using localStorage only");
+        }
+
+        // Функция для генерации уникального ID
+        function generateEvalId() {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        }
+
+        // Сохранение оценки в Firebase
+        function shareEvaluation() {
+            const evaluator = document.getElementById("evaluator-name").value.trim() || "Anonymous";
+            const platformName = document.getElementById("platform-name").value.trim() || "Platform 1";
+
+            if (!evaluator || !platformName) {
+                alert("Заполните имя и платформу!");
+                return;
+            }
+
+            if (!firebaseEnabled) {
+                alert("❌ Firebase не настроен. Используй кнопку 'Save & Add to Comparison' для локального сохранения.");
+                return;
+            }
+
+            const evalId = generateEvalId();
+            const evalData = {
+                evaluator: evaluator,
+                platform: platformName,
+                timestamp: new Date().toLocaleString('ru-RU'),
+                data: JSON.parse(JSON.stringify(currentEvaluation))
+            };
+
+            db.ref(`evaluations/${evalId}`).set(evalData).then(() => {
+                const shareUrl = `${window.location.origin}${window.location.pathname}?eval=${evalId}`;
+                const input = document.createElement("input");
+                input.value = shareUrl;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand("copy");
+                document.body.removeChild(input);
+
+                alert(`✅ Ссылка скопирована в буфер обмена!\n\n${shareUrl}\n\nДелись с коллегами - они смогут открыть эту оценку без регистрации!`);
+                showSuccessMessage();
+            }).catch(err => {
+                alert("❌ Ошибка при сохранении: " + err.message);
+            });
+        }
+
+        // Загрузка оценки из Firebase по URL параметру
+        function loadFromFirebaseUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const evalId = params.get('eval');
+
+            if (evalId && firebaseEnabled) {
+                db.ref(`evaluations/${evalId}`).once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        currentEvaluation = data.data;
+                        document.getElementById("evaluator-name").value = data.evaluator;
+                        document.getElementById("platform-name").value = data.platform;
+                        renderEvaluationTable();
+                        renderComparisonTab();
+                        renderDashboard();
+
+                        const msg = document.querySelector('.info-box');
+                        if (msg) {
+                            msg.innerHTML = `✅ <strong>Загружена оценка ${data.evaluator}</strong> для платформы <strong>${data.platform}</strong><br>Сделана: ${data.timestamp}`;
+                            msg.style.background = '#e8f5e9';
+                            msg.style.borderLeftColor = '#4caf50';
+                            msg.style.color = '#2e7d32';
+                        }
+                    }
+                });
+            }
+        }
+
         initEvaluations();
+        loadFromFirebaseUrl();
         renderEvaluationTable();
         renderComparisonTab();
     </script>
