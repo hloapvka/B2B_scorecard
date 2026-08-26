@@ -123,7 +123,6 @@
                     <input type="text" id="platform-name" placeholder="Платформа (например, GR8)">
                     <button onclick="savePlatformEvaluation()" style="background: #4caf50;">💾 Save & Add to Comparison</button>
                 </div>
-                <button onclick="shareEvaluation()" style="background: #2196F3;">🔗 Share Link</button>
                 <button onclick="exportToExcel()">📥 Export Excel</button>
             </div>
 
@@ -350,23 +349,39 @@
             const platformName = document.getElementById("platform-name").value.trim() || "Platform 1";
 
             if (!evaluator || !platformName) {
-                alert("Заполните имя и платформу!");
+                alert("⚠️ Заполните имя и платформу!");
                 return;
             }
 
+            console.log(`💾 Сохранение оценки: ${platformName} (${evaluator})`);
+
             const key = `${platformName}_${evaluator}_${new Date().getTime()}`;
-            evaluations[key] = {
+            const evalData = {
                 evaluator: evaluator,
                 platform: platformName,
                 timestamp: new Date().toLocaleString('ru-RU'),
                 data: JSON.parse(JSON.stringify(currentEvaluation))
             };
 
+            // Сохраняем локально
+            evaluations[key] = evalData;
             saveToLocalStorage();
+            console.log("✅ Сохранено в localStorage");
+
+            // Сохраняем в Firebase (публичная база для всех)
+            if (firebaseEnabled) {
+                console.log("📤 Загружаем в Firebase...");
+                savePlatformEvaluationToFirebase(key, evalData);
+            } else {
+                console.log("⚠️ Firebase не доступен");
+                alert("✅ Оценка сохранена локально\n\n⚠️ Firebase не настроен - другие пользователи не смогут увидеть вашу оценку");
+            }
+
             updateDashboardSelector();
             renderComparisonTab();
             showSuccessMessage();
 
+            // Очищаем поля
             document.getElementById("evaluator-name").value = "";
             document.getElementById("platform-name").value = "";
         }
@@ -931,126 +946,95 @@
         // Инициализация Firebase
         try {
             if (firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.apiKey) {
-                console.log("🔥 Initializing Firebase...");
+                console.log("🔥 Инициализация Firebase...");
                 const app = firebase.initializeApp(firebaseConfig);
                 db = firebase.database();
                 firebaseEnabled = true;
-                console.log("✅ Firebase initialized successfully!");
+                console.log("✅ Firebase инициализирован!");
+
+                // Загружаем все оценки с сервера
+                loadAllEvaluationsFromFirebase();
             } else {
-                console.log("⚠️ Firebase credentials not set");
+                console.log("⚠️ Firebase не настроен");
             }
         } catch (e) {
-            console.error("❌ Firebase initialization error:", e);
-            console.error("Error details:", e.message, e.code);
+            console.error("❌ Ошибка Firebase:", e.message);
         }
 
-        // Функция для генерации уникального ID
-        function generateEvalId() {
-            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        }
-
-        // Сохранение оценки в Firebase
-        function shareEvaluation() {
-            const evaluator = document.getElementById("evaluator-name").value.trim() || "Anonymous";
-            const platformName = document.getElementById("platform-name").value.trim() || "Platform 1";
-
-            if (!evaluator || !platformName) {
-                alert("Заполните имя и платформу!");
-                return;
-            }
-
+        // Загрузить ВСЕ оценки из Firebase
+        function loadAllEvaluationsFromFirebase() {
             if (!firebaseEnabled) {
-                alert("❌ Firebase не настроен. Используй кнопку 'Save & Add to Comparison' для локального сохранения.");
+                console.log("⚠️ Firebase отключен, используем только localStorage");
                 return;
             }
 
-            const evalId = generateEvalId();
-            // Кодируем данные в JSON строку для совместимости с Firebase
-            const evalData = {
-                evaluator: evaluator,
-                platform: platformName,
-                timestamp: new Date().toLocaleString('ru-RU'),
-                data: JSON.stringify(currentEvaluation)
+            console.log("📥 Загружаем все оценки с сервера Firebase...");
+            db.ref('all_evaluations').once('value',
+                (snapshot) => {
+                    if (snapshot.exists()) {
+                        const firebaseEvals = snapshot.val();
+                        console.log("📦 Получено оценок с сервера:", Object.keys(firebaseEvals).length);
+
+                        // Преобразуем в наш формат
+                        Object.entries(firebaseEvals).forEach(([key, eval_data]) => {
+                            try {
+                                if (typeof eval_data.data === 'string') {
+                                    eval_data.data = JSON.parse(eval_data.data);
+                                }
+                                evaluations[key] = eval_data;
+                                console.log(`✅ Загружена оценка: ${eval_data.platform} (${eval_data.evaluator})`);
+                            } catch (e) {
+                                console.error("❌ Ошибка парсинга оценки:", e, eval_data);
+                            }
+                        });
+
+                        saveToLocalStorage();
+                        renderComparisonTab();
+                        console.log("✅ Все оценки успешно загружены!");
+                    } else {
+                        console.log("ℹ️ В базе еще нет оценок");
+                    }
+                },
+                (error) => {
+                    console.error("❌ Ошибка при загрузке оценок:", error.message);
+                }
+            );
+        }
+
+        // Сохранить оценку в Firebase (публичная для всех)
+        function savePlatformEvaluationToFirebase(key, eval_data) {
+            if (!firebaseEnabled) {
+                console.log("⚠️ Firebase отключен - оценка сохранена только локально");
+                return;
+            }
+
+            console.log("💾 Сохраняем оценку в Firebase:", key);
+
+            const firebaseData = {
+                evaluator: eval_data.evaluator,
+                platform: eval_data.platform,
+                timestamp: eval_data.timestamp,
+                data: JSON.stringify(eval_data.data)
             };
 
-            db.ref(`evaluations/${evalId}`).set(evalData).then(() => {
-                const shareUrl = `${window.location.origin}${window.location.pathname}?eval=${evalId}`;
-                const input = document.createElement("input");
-                input.value = shareUrl;
-                document.body.appendChild(input);
-                input.select();
-                document.execCommand("copy");
-                document.body.removeChild(input);
-
-                alert(`✅ Ссылка скопирована в буфер обмена!\n\n${shareUrl}\n\nДелись с коллегами - они смогут открыть эту оценку без регистрации!`);
-                showSuccessMessage();
-            }).catch(err => {
-                alert("❌ Ошибка при сохранении: " + err.message);
-                console.error("Firebase save error:", err);
-            });
-        }
-
-        // Загрузка оценки из Firebase по URL параметру
-        function loadFromFirebaseUrl() {
-            const params = new URLSearchParams(window.location.search);
-            const evalId = params.get('eval');
-
-            if (evalId && firebaseEnabled) {
-                db.ref(`evaluations/${evalId}`).once('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        // Декодируем JSON обратно
-                        try {
-                            currentEvaluation = JSON.parse(data.data);
-                            const evaluator = data.evaluator;
-                            const platform = data.platform;
-                            const timestamp = data.timestamp;
-
-                            // Заполняем поля ввода (они будут предзаполнены но не редактируемы)
-                            const nameInput = document.getElementById("evaluator-name");
-                            const platformInput = document.getElementById("platform-name");
-                            nameInput.value = evaluator;
-                            platformInput.value = platform;
-                            nameInput.disabled = true;
-                            platformInput.disabled = true;
-
-                            // Скрываем кнопки Save & Share (оценка уже сохранена)
-                            const shareBtn = document.querySelector('button[onclick="shareEvaluation()"]');
-                            const saveBtn = document.querySelector('button[onclick="savePlatformEvaluation()"]');
-                            if (shareBtn) shareBtn.style.display = 'none';
-                            if (saveBtn) saveBtn.style.display = 'none';
-
-                            // Рендерим на всех вкладках
-                            renderEvaluationTable();
-                            renderComparisonTab();
-                            renderDashboard();
-
-                            // Обновляем информационное сообщение
-                            const msg = document.querySelector('.info-box');
-                            if (msg) {
-                                msg.innerHTML = `✅ <strong>Просмотр оценки ${evaluator}</strong> для платформы <strong>${platform}</strong><br>Сделана: ${timestamp}<br><em>Это общая оценка - доступна всем по ссылке</em>`;
-                                msg.style.background = '#e8f5e9';
-                                msg.style.borderLeftColor = '#4caf50';
-                                msg.style.color = '#2e7d32';
-                            }
-
-                            console.log("✅ Evaluation loaded from Firebase:", {evaluator, platform, timestamp});
-                        } catch (e) {
-                            console.error("Error parsing evaluation data:", e);
-                            alert("❌ Ошибка при загрузке оценки: " + e.message);
-                        }
-                    } else {
-                        console.log("Evaluation not found:", evalId);
-                        alert("⚠️ Оценка не найдена. Проверь ссылку.");
-                    }
+            db.ref(`all_evaluations/${key}`).set(firebaseData)
+                .then(() => {
+                    console.log("✅ Оценка успешно сохранена в Firebase!");
+                    // Перезагружаем все оценки
+                    loadAllEvaluationsFromFirebase();
+                })
+                .catch(err => {
+                    console.error("❌ ОШИБКА сохранения в Firebase:", err.code, err.message);
+                    alert("❌ Ошибка сохранения: " + err.message);
                 });
-            }
         }
 
+        // Инициализация приложения
+        console.log("🚀 Инициализация приложения...");
         initEvaluations();
-        loadFromFirebaseUrl();
         renderEvaluationTable();
         renderComparisonTab();
+        console.log("✅ Приложение инициализировано!");
     </script>
 </body>
 </html>
