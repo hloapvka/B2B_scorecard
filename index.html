@@ -97,8 +97,8 @@
         <div id="evaluation" class="tab-content active">
             <div class="controls">
                 <div class="platform-input">
-                    <input type="text" id="evaluator-name" placeholder="Your name (John, Parimatch, etc)">
-                    <input type="text" id="platform-name" placeholder="Platform (Platform A, Bet365)">
+                    <input type="text" id="evaluator-name" placeholder="Ваше имя/компания (например, John)">
+                    <input type="text" id="platform-name" placeholder="Платформа (например, GR8)">
                     <button onclick="savePlatformEvaluation()" style="background: #4caf50;">💾 Save & Add to Comparison</button>
                 </div>
                 <button onclick="exportToExcel()">📥 Export Excel</button>
@@ -150,7 +150,37 @@
         <!-- Comparison Tab -->
         <div id="comparison" class="tab-content">
             <div class="info-box">Все сохраненные оценки. Сравнивай разные версии и оценивающих.</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
+                <button id="compare-btn" onclick="compareSelectedEvaluations()" style="background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: none;">📊 Сравнить выбранные</button>
+                <span id="selected-count" style="font-size: 12px; color: #999;"></span>
+            </div>
+            <div id="comparison-result" style="margin-bottom: 20px;"></div>
             <div id="evaluations-list"></div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 30px; max-width: 400px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);">
+            <h3 style="margin-bottom: 15px; color: #333;">Удалить оценку?</h3>
+            <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Вы уверены что хотите удалить эту оценку? Это действие нельзя отменить.</p>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="closeDeleteModal()" style="background: #4caf50; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">Оставить</button>
+                <button onclick="confirmDelete()" style="background: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div id="view-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2500; overflow-y: auto;">
+        <div style="background: white; margin: 20px auto; border-radius: 12px; max-width: 1200px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);">
+            <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee;">
+                <h3 id="view-title" style="color: #333;"></h3>
+                <button onclick="closeViewModal()" style="background: #f5f5f5; border: none; cursor: pointer; padding: 8px 12px; border-radius: 4px; font-size: 20px;">✕</button>
+            </div>
+            <div style="padding: 20px;">
+                <div id="view-content"></div>
+            </div>
         </div>
     </div>
 
@@ -326,12 +356,12 @@
                             <td>
                                 <div class="score-select-wrapper" onmouseover="showScoreTooltips(this)" onmouseout="hideScoreTooltips(this)">
                                     <select onchange="updateEvalScore('${section}', ${idx}, this.value)">
-                                        <option value="0">—</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
+                                        <option value="0" ${score === 0 ? 'selected' : ''}>—</option>
+                                        <option value="1" ${score === 1 ? 'selected' : ''}>1</option>
+                                        <option value="2" ${score === 2 ? 'selected' : ''}>2</option>
+                                        <option value="3" ${score === 3 ? 'selected' : ''}>3</option>
+                                        <option value="4" ${score === 4 ? 'selected' : ''}>4</option>
+                                        <option value="5" ${score === 5 ? 'selected' : ''}>5</option>
                                     </select>
                                     <div class="score-tooltip" style="display:none;">
                                         <div>1: ${scoreDescriptors[item.name]?.[1]}</div>
@@ -496,6 +526,7 @@
             const container = document.getElementById("evaluations-list");
             if (Object.keys(evaluations).length === 0) {
                 container.innerHTML = '<div class="info-box">No saved evaluations yet. Fill in and save an evaluation first.</div>';
+                updateSelectedCount();
                 return;
             }
 
@@ -503,21 +534,114 @@
             Object.entries(evaluations).forEach(([key, eval_data]) => {
                 const overall = calculateScoreForEval(eval_data.data);
                 container.innerHTML += `
-                    <div class="evaluation-item">
-                        <div>
+                    <div class="evaluation-item" style="align-items: flex-start;">
+                        <input type="checkbox" id="check-${key}" value="${key}" style="margin-top: 5px; cursor: pointer;">
+                        <div style="flex: 1;">
                             <div class="evaluation-item-name">${eval_data.platform}</div>
                             <div style="font-size: 12px; color: #999;">${eval_data.evaluator} • ${eval_data.timestamp}</div>
                         </div>
                         <div class="evaluation-item-score">${overall.toFixed(2)}</div>
                         <div class="evaluation-item-actions">
-                            <button class="btn-view" onclick="viewEvaluation('${key}')">View</button>
+                            <button class="btn-view" onclick="viewEvaluation('${key}')">👁️ View</button>
                             <button class="btn-download" onclick="downloadEvaluationExcel('${key}')">📥 Excel</button>
-                            <button class="btn-export-sheets" onclick="exportToGoogleSheets('${key}')">📊 Sheets</button>
-                            <button class="btn-delete" onclick="deleteEvaluation('${key}')">Delete</button>
+                            <button class="btn-delete" onclick="openDeleteModal('${key}')">🗑️ Delete</button>
                         </div>
                     </div>
                 `;
             });
+
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', updateSelectedCount);
+            });
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const checked = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).length;
+            const btn = document.getElementById('compare-btn');
+            const counter = document.getElementById('selected-count');
+            if (checked > 1) {
+                btn.style.display = 'block';
+                counter.textContent = `Выбрано: ${checked}`;
+            } else {
+                btn.style.display = 'none';
+                counter.textContent = '';
+            }
+        }
+
+        let deleteKey = null;
+        function openDeleteModal(key) {
+            deleteKey = key;
+            document.getElementById('delete-modal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').style.display = 'none';
+            deleteKey = null;
+        }
+
+        function confirmDelete() {
+            if (deleteKey) {
+                delete evaluations[deleteKey];
+                saveToLocalStorage();
+                updateDashboardSelector();
+                renderComparisonTab();
+                showSuccessMessage();
+                closeDeleteModal();
+            }
+        }
+
+        function compareSelectedEvaluations() {
+            const checked = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            if (checked.length < 2) {
+                alert('Выберите минимум 2 оценки для сравнения');
+                return;
+            }
+
+            const resultContainer = document.getElementById('comparison-result');
+            resultContainer.innerHTML = '';
+
+            const sections = Object.keys(criteria).map(s => s.replace(/^\d+\. /, ""));
+            let html = `<div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; color: #667eea;">Сравнение по Section Scores</h3>
+                <div class="table-wrapper">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead style="background: #f5f5f5;">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd;">Раздел</th>`;
+
+            checked.forEach(key => {
+                const eval_data = evaluations[key];
+                html += `<th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd;">${eval_data.platform}<br><span style="font-size: 11px; color: #999;">${eval_data.evaluator}</span></th>`;
+            });
+
+            html += `</tr></thead><tbody>`;
+
+            Object.entries(criteria).forEach(([section, items]) => {
+                html += `<tr><td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600;">${section}</td>`;
+
+                checked.forEach(key => {
+                    const eval_data = evaluations[key];
+                    let sectionWeighted = 0, sectionWeight = 0;
+                    items.forEach((item, idx) => {
+                        const score = eval_data.data[section]?.[idx]?.score || 0;
+                        sectionWeighted += score * item.weight;
+                        sectionWeight += item.weight;
+                    });
+                    const avgScore = sectionWeight > 0 ? (sectionWeighted / sectionWeight).toFixed(2) : '—';
+                    const color = avgScore === '—' ? '#ccc' : avgScore >= 4 ? '#4caf50' : avgScore >= 3 ? '#ffc107' : '#f44336';
+                    html += `<td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee; color: ${color}; font-weight: 600;">${avgScore}</td>`;
+                });
+
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table></div></div>`;
+            resultContainer.innerHTML = html;
+        }
+
+        function closeViewModal() {
+            document.getElementById('view-modal').style.display = 'none';
         }
 
         function calculateScoreForEval(evalData) {
@@ -533,21 +657,68 @@
         }
 
         function viewEvaluation(key) {
-            currentEvaluation = JSON.parse(JSON.stringify(evaluations[key].data));
-            switchTab('dashboard');
-            updateDashboardSelector();
-            document.getElementById("dashboard-selector").value = key;
-            renderDashboard();
-        }
+            const eval_data = evaluations[key];
+            currentEvaluation = JSON.parse(JSON.stringify(eval_data.data));
 
-        function deleteEvaluation(key) {
-            if (confirm("Delete this evaluation?")) {
-                delete evaluations[key];
-                saveToLocalStorage();
-                updateDashboardSelector();
-                renderComparisonTab();
-                showSuccessMessage();
-            }
+            let html = `
+                <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #eee;">
+                    <h2 style="color: #333; margin-bottom: 10px;">${eval_data.platform}</h2>
+                    <div style="font-size: 14px; color: #666;">Оценивающий: <strong>${eval_data.evaluator}</strong> | Дата: ${eval_data.timestamp}</div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Общие показатели</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 28px; font-weight: bold; color: #667eea;">${calculateOverallScore().toFixed(2)}</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 5px;">Overall Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Детальные оценки по критериям</h3>
+                    <div style="background: white; border-radius: 8px; overflow: hidden;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead style="background: #f5f5f5;">
+                                <tr>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd;">Критерий</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd;">Score</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd;">Weight</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd;">Weighted</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd;">Комментарий</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            Object.entries(criteria).forEach(([section, items]) => {
+                html += `<tr style="background: #fafafa;"><td colspan="5" style="padding: 12px; font-weight: 600; color: #333; border-bottom: 1px solid #ddd;">${section}</td></tr>`;
+
+                items.forEach((item, idx) => {
+                    const score = eval_data.data[section]?.[idx]?.score || 0;
+                    const comment = eval_data.data[section]?.[idx]?.comment || '';
+                    const weighted = (score * item.weight).toFixed(2);
+                    const scoreColor = score >= 4 ? '#4caf50' : score >= 3 ? '#ffc107' : score <= 2 ? '#f44336' : '#999';
+
+                    html += `<tr>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 13px;">
+                            <strong>${item.name}</strong><br>
+                            <span style="font-size: 11px; color: #999;">${item.desc}</span>
+                        </td>
+                        <td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee; color: ${scoreColor}; font-weight: 600;">${score || '—'}</td>
+                        <td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee; font-size: 12px;">${item.weight}</td>
+                        <td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee; font-weight: 600;">${score ? weighted : '—'}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; font-size: 12px; color: #666;">${comment}</td>
+                    </tr>`;
+                });
+            });
+
+            html += `</tbody></table></div></div>`;
+
+            document.getElementById('view-title').textContent = `${eval_data.platform} — ${eval_data.evaluator}`;
+            document.getElementById('view-content').innerHTML = html;
+            document.getElementById('view-modal').style.display = 'block';
+            document.getElementById('view-modal').scrollTop = 0;
         }
 
         function downloadEvaluationExcel(key) {
@@ -566,11 +737,6 @@
             const ws = XLSX.utils.aoa_to_sheet(data);
             XLSX.utils.book_append_sheet(wb, ws, "Evaluation");
             XLSX.writeFile(wb, `${eval_data.platform}_${eval_data.evaluator}.xlsx`);
-        }
-
-        function exportToGoogleSheets(key) {
-            const eval_data = evaluations[key];
-            alert(`📊 Google Sheets Export\n\nTo export to Google Sheets:\n\n1. Create a new Google Sheet\n2. Copy the data from "Download Excel" or manually enter it\n3. Share the link for team collaboration\n\nAlternatively, use the Google Sheets API for automated integration.`);
         }
 
         function exportToExcel() {
