@@ -44,39 +44,84 @@
         input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
         textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; resize: vertical; min-height: 60px; max-height: 150px; }
         .score-descriptor { font-size: 11px; color: #999; font-style: italic; margin-top: 3px; display: block; max-width: 250px; }
+        .score-select-wrapper { position: relative; display: inline-block; width: 100%; }
+        .score-select-wrapper select { position: relative; z-index: 1; }
+        .score-tooltip { position: absolute; bottom: 100%; left: 0; background: #333; color: white; padding: 8px 12px; border-radius: 4px; font-size: 11px; white-space: nowrap; margin-bottom: 5px; z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .score-select-wrapper:hover .score-tooltip { opacity: 1; }
         .priority-critical { background: #ffcdd2; color: #c62828; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
         .priority-high { background: #ffe0b2; color: #e65100; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
         .priority-medium { background: #fff9c4; color: #f57f17; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
         .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .chart-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .section-scores { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .section-score-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; }
-        .section-score-value { font-size: 24px; font-weight: bold; color: #667eea; }
+        .section-score-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; font-size: 12px; }
+        .section-score-value { font-size: 18px; font-weight: bold; color: #667eea; min-width: 100px; text-align: right; }
         .summary-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-item { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
         .stat-value { font-size: 32px; font-weight: bold; color: #667eea; }
         .success-message { display: none; position: fixed; bottom: 20px; right: 20px; background: #4caf50; color: white; padding: 15px 25px; border-radius: 8px; z-index: 2000; }
         .success-message.show { display: block; }
         .info-box { background: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px; border-radius: 4px; margin-bottom: 20px; color: #1565c0; font-size: 13px; }
+        .evaluation-item { background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .evaluation-item-name { font-weight: 600; color: #333; }
+        .evaluation-item-score { font-size: 18px; font-weight: bold; color: #667eea; margin: 0 15px; }
+        .evaluation-item-actions { display: flex; gap: 8px; }
+        .evaluation-item-actions button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .btn-delete { background: #f44336; color: white; }
+        .btn-download { background: #2196F3; color: white; }
+        .btn-view { background: #667eea; color: white; }
+        .dashboard-selector { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .dashboard-selector select { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; max-width: 300px; }
         @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } .charts-grid { grid-template-columns: 1fr; } th, td { padding: 8px 6px; font-size: 12px; } }
     </style>
 </head>
 <body>
-    <div id="successMessage" class="success-message">✓ Excel файл скачан!</div>
+    <div id="successMessage" class="success-message">✓ Сохранено!</div>
 
     <div class="container">
         <div class="header">
             <h1>🎰 B2B iGaming Platform Scorecard</h1>
-            <p>Профессиональный инструмент оценки с автоматическим сохранением</p>
+            <p>Совместное оценивание платформ. Каждая оценка сохраняется отдельно.</p>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
-            <button class="tab-btn" onclick="switchTab('evaluation')">Evaluation</button>
+            <button class="tab-btn active" onclick="switchTab('evaluation')">Evaluation</button>
+            <button class="tab-btn" onclick="switchTab('dashboard')">Dashboard</button>
             <button class="tab-btn" onclick="switchTab('comparison')">Comparison</button>
         </div>
 
-        <div id="dashboard" class="tab-content active">
+        <!-- Evaluation Tab -->
+        <div id="evaluation" class="tab-content active">
+            <div class="controls">
+                <div class="platform-input">
+                    <input type="text" id="evaluator-name" placeholder="Ваше имя/компания (например, John, Parimatch)" value="">
+                    <input type="text" id="platform-name" placeholder="Платформа (например, Platform A, Bet365)" value="">
+                    <button onclick="savePlatformEvaluation()" style="background: #4caf50;">💾 Save & Add to Comparison</button>
+                </div>
+                <button onclick="exportToExcel()">📥 Export Excel</button>
+            </div>
+
+            <div class="info-box">💾 Каждое "Save & Add to Comparison" сохраняет твою оценку с твоим именем. Потом можно сравнивать оценки разных людей.</div>
+
+            <div class="evaluation-table">
+                <div class="table-wrapper">
+                    <table id="evaluation-table">
+                        <thead><tr><th>Section</th><th>Criterion</th><th>Description</th><th>Priority</th><th>Weight</th><th>Score (1-5)</th><th>Weighted</th><th>Comment</th></tr></thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
+            <div class="dashboard-selector">
+                <label>Выбери оценку для анализа:</label>
+                <select onchange="switchDashboardPlatform(this.value)" id="dashboard-selector">
+                    <option value="">-- Выбрать --</option>
+                </select>
+            </div>
+
             <div id="kpi-container" class="dashboard">
                 <div class="kpi-card"><div class="kpi-label">Overall Score</div><div class="kpi-value" id="overall-score">0.00</div><div class="kpi-status" id="overall-status">Not evaluated</div></div>
                 <div class="kpi-card"><div class="kpi-label">Critical Gaps</div><div class="kpi-value" id="critical-gaps">0</div></div>
@@ -99,152 +144,156 @@
             <div class="section-scores" id="section-scores-container"></div>
         </div>
 
-        <div id="evaluation" class="tab-content">
-            <div class="controls">
-                <div class="platform-input">
-                    <input type="text" id="platform-name" placeholder="Platform name" value="Platform 1">
-                    <button onclick="setPlatformName()">Set Platform</button>
-                </div>
-                <button onclick="exportToExcel()">📥 Export Excel</button>
-                <button onclick="exportToJSON()">📥 Export JSON</button>
-            </div>
-
-            <div class="info-box">💾 Данные сохраняются автоматически. Наведи на Score → видишь дескриптор оценки.</div>
-
-            <div class="evaluation-table">
-                <div class="table-wrapper">
-                    <table id="evaluation-table">
-                        <thead><tr><th>Section</th><th>Criterion</th><th>Description</th><th>Priority</th><th>Weight</th><th>Score (1-5)</th><th>Weighted</th><th>Comment</th></tr></thead>
-                        <tbody id="table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
+        <!-- Comparison Tab -->
         <div id="comparison" class="tab-content">
-            <div class="controls">
-                <div class="platform-input">
-                    <input type="text" id="new-platform-name" placeholder="Platform name">
-                    <button onclick="addPlatformForComparison()">+ Add Platform</button>
-                </div>
-            </div>
-
-            <div class="section-scores">
-                <div style="font-weight: 600; margin-bottom: 15px; color: #667eea;">Platform Ranking</div>
-                <div id="platform-ranking"></div>
-            </div>
-
-            <div class="evaluation-table">
-                <div class="table-wrapper">
-                    <table id="comparison-table">
-                        <thead id="comparison-thead"><tr><th>Section</th><th>Platform 1</th></tr></thead>
-                        <tbody id="comparison-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
+            <div class="info-box">Все сохраненные оценки появляются здесь. Сравнивай разные версии и оценивающих.</div>
+            <div id="evaluations-list"></div>
         </div>
     </div>
 
     <script>
         const scoreDescriptors = {
-            "Core flows stability": { 1: "Множество критичных ошибок", 2: "Часто возникают ошибки", 3: "Редкие ошибки", 4: "Стабильно, редкие проблемы", 5: "Полная стабильность" },
-            "Mirror rotation": { 1: "Нет ротации зеркал", 2: "Нестабильная ротация", 3: "Ротация с задержками", 4: "Хорошая ротация", 5: "Полностью автоматическая" },
-            "Session persistence": { 1: "Сессия теряется всегда", 2: "Часто требуется авторизация", 3: "Иногда теряется", 4: "Обычно сохраняется", 5: "Всегда сохраняется" },
-            "Frontend performance": { 1: "Загрузка >5s", 2: "Загрузка 4-5s", 3: "Загрузка 3-4s", 4: "Загрузка <3s", 5: "Загрузка <2s" }
+            "Core flows stability": { 1: "Множество ошибок", 2: "Часто ошибки", 3: "Редко", 4: "Стабильно", 5: "Идеально" },
+            "Mirror rotation": { 1: "Нет ротации", 2: "Нестабильно", 3: "С задержками", 4: "Хорошо", 5: "Идеально" },
+            "Session persistence": { 1: "Теряется", 2: "Часто теряется", 3: "Иногда", 4: "Обычно", 5: "Всегда" },
+            "Frontend performance": { 1: ">5s", 2: "4-5s", 3: "3-4s", 4: "<3s", 5: "<2s" }
         };
 
         const criteria = {
             "1. Стабильность работы": [
-                { name: "Core flows stability", desc: "Нет блокирующих ошибок в core flows", priority: "Critical", weight: 5, score: 0, comment: "" },
-                { name: "Mirror rotation", desc: "Автоматическая ротация зеркал", priority: "Critical", weight: 5, score: 0, comment: "" },
-                { name: "Session persistence", desc: "Сессия сохраняется при переходе между зеркалами", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Frontend performance", desc: "Загрузка main pages <3s", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Mobile scenarios", desc: "Корректная работа на мобильных", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Game providers", desc: "Подключены основные провайдеры", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Bonus accuracy", desc: "Bonus/FS начисляются корректно", priority: "Critical", weight: 5, score: 0, comment: "" }
+                { name: "Core flows stability", desc: "Нет блокирующих ошибок", priority: "Critical", weight: 5 },
+                { name: "Mirror rotation", desc: "Автоматическая ротация зеркал", priority: "Critical", weight: 5 },
+                { name: "Session persistence", desc: "Сессия при переходе", priority: "High", weight: 4 },
+                { name: "Frontend performance", desc: "Загрузка <3s", priority: "High", weight: 4 },
+                { name: "Mobile scenarios", desc: "На мобильных", priority: "High", weight: 4 },
+                { name: "Game providers", desc: "Основные провайдеры", priority: "High", weight: 4 },
+                { name: "Bonus accuracy", desc: "Начисление бонусов", priority: "Critical", weight: 5 }
             ],
             "2. Платежи": [
-                { name: "Card payment UI", desc: "Собственный card payment UI/frame", priority: "Critical", weight: 5, score: 0, comment: "" },
-                { name: "Player data mapping", desc: "Маппирование player/payment data", priority: "Critical", weight: 5, score: 0, comment: "" },
-                { name: "Fallback routing", desc: "Маршрутизация при отказе платежа", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Open Banking", desc: "≥5 Open Banking провайдеров", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Retry on failure", desc: "Альтернативные методы при ошибке", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "1-Click return", desc: "Возврат с 1-Click методов", priority: "Medium", weight: 3, score: 0, comment: "" }
+                { name: "Card payment UI", desc: "Собственный UI", priority: "Critical", weight: 5 },
+                { name: "Player data mapping", desc: "Маппирование данных", priority: "Critical", weight: 5 },
+                { name: "Fallback routing", desc: "При отказе платежа", priority: "High", weight: 4 },
+                { name: "Open Banking", desc: "≥5 провайдеров", priority: "High", weight: 4 },
+                { name: "Retry on failure", desc: "Альтернативные методы", priority: "Medium", weight: 3 },
+                { name: "1-Click return", desc: "Возврат 1-Click", priority: "Medium", weight: 3 }
             ],
             "3. Главная страница": [
-                { name: "Block configuration", desc: "Блоки настраиваются через CMS", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Content segmentation", desc: "Разный контент для разных пользователей", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Content personalization", desc: "Персонализация по user attributes", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "Localization", desc: "Локализация без изменения кода", priority: "High", weight: 4, score: 0, comment: "" }
+                { name: "Block configuration", desc: "Через CMS", priority: "High", weight: 4 },
+                { name: "Content segmentation", desc: "Разный контент", priority: "High", weight: 4 },
+                { name: "Personalization", desc: "По user attributes", priority: "Medium", weight: 3 },
+                { name: "Localization", desc: "Без изменения кода", priority: "High", weight: 4 }
             ],
             "4. Форма регистрации": [
-                { name: "Traffic customization", desc: "Адаптация под разные источники", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Third-party compatibility", desc: "Работа на сторонних доменах", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "Format flexibility", desc: "Разные форматы отображения", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "Post-reg upsell", desc: "Вариативность апсейла", priority: "Medium", weight: 3, score: 0, comment: "" }
+                { name: "Traffic customization", desc: "Под источники", priority: "High", weight: 4 },
+                { name: "Third-party compat", desc: "На сторонних", priority: "Medium", weight: 3 },
+                { name: "Format flexibility", desc: "Разные форматы", priority: "Medium", weight: 3 },
+                { name: "Post-reg upsell", desc: "Апсейл", priority: "Medium", weight: 3 }
             ],
             "5. Кассир": [
-                { name: "Product communications", desc: "Коммуникации через кассир", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "UX streamlining", desc: "Отсутствие лишних этапов", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Withdrawal clarity", desc: "Ясные условия вывода", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "KYC flow", desc: "Простой KYC процесс", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Support integration", desc: "Встроенный саппорт", priority: "Medium", weight: 3, score: 0, comment: "" }
+                { name: "Product communications", desc: "Коммуникации", priority: "High", weight: 4 },
+                { name: "UX streamlining", desc: "Без лишних этапов", priority: "High", weight: 4 },
+                { name: "Withdrawal clarity", desc: "Условия вывода", priority: "High", weight: 4 },
+                { name: "KYC flow", desc: "KYC процесс", priority: "High", weight: 4 },
+                { name: "Support integration", desc: "Саппорт", priority: "Medium", weight: 3 }
             ],
             "6. Ивенты и трекинг": [
-                { name: "Event catalog", desc: "Каталог product events", priority: "Critical", weight: 5, score: 0, comment: "" },
-                { name: "Delay configuration", desc: "Настройка задержки ивентов", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "Real-time delivery", desc: "Передача с минимальной задержкой", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Event-driven flows", desc: "Ивенты для UI-сценариев", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Frontend tracking", desc: "Разметка ивентами", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Event segmentation", desc: "Сегментация ивентов", priority: "Medium", weight: 3, score: 0, comment: "" }
+                { name: "Event catalog", desc: "Каталог events", priority: "Critical", weight: 5 },
+                { name: "Delay config", desc: "Настройка задержки", priority: "Medium", weight: 3 },
+                { name: "Real-time delivery", desc: "Минимальная задержка", priority: "High", weight: 4 },
+                { name: "Event-driven flows", desc: "Для UI", priority: "High", weight: 4 },
+                { name: "Frontend tracking", desc: "Разметка", priority: "High", weight: 4 },
+                { name: "Event segmentation", desc: "Сегментация", priority: "Medium", weight: 3 }
             ],
             "7. Аналитика": [
-                { name: "Analytics coverage", desc: "Tracking всех key funnels", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Custom events", desc: "Custom ивенты в analytics", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "Cohort analysis", desc: "Data для когортного анализа", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "Revenue attribution", desc: "Отслеживание revenue", priority: "High", weight: 4, score: 0, comment: "" }
+                { name: "Analytics coverage", desc: "Все funnels", priority: "High", weight: 4 },
+                { name: "Custom events", desc: "Custom events", priority: "Medium", weight: 3 },
+                { name: "Cohort analysis", desc: "Для когорт", priority: "Medium", weight: 3 },
+                { name: "Revenue attribution", desc: "Tracking revenue", priority: "High", weight: 4 }
             ],
             "8. Бонусный инструментарий": [
-                { name: "Bonus clarity", desc: "Отображение условий wagering", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Game search", desc: "Поиск игр для отыгрыша", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "Multi-stage bonuses", desc: "Multi-stage bonuses", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Bonus cancellation", desc: "Безошибочная отмена", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "FS instant crediting", desc: "Зачисление выигрышей FS", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Multi-bonus stacking", desc: "Управление наложением", priority: "Medium", weight: 3, score: 0, comment: "" }
+                { name: "Bonus clarity", desc: "Условия wagering", priority: "High", weight: 4 },
+                { name: "Game search", desc: "Поиск игр", priority: "Medium", weight: 3 },
+                { name: "Multi-stage", desc: "Multi-stage", priority: "High", weight: 4 },
+                { name: "Bonus cancellation", desc: "Отмена", priority: "High", weight: 4 },
+                { name: "FS crediting", desc: "Зачисление FS", priority: "High", weight: 4 },
+                { name: "Multi-bonus stack", desc: "Наложение", priority: "Medium", weight: 3 }
             ],
             "9. Программа лояльности": [
-                { name: "Loyalty rewards area", desc: "Все rewards в одной area", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Rewards variety", desc: "Регулярные привлекательные бонусы", priority: "High", weight: 4, score: 0, comment: "" },
-                { name: "Reward notifications", desc: "Уведомления о получении награды", priority: "Medium", weight: 3, score: 0, comment: "" }
+                { name: "Loyalty area", desc: "Единое место", priority: "High", weight: 4 },
+                { name: "Rewards variety", desc: "Регулярные", priority: "High", weight: 4 },
+                { name: "Notifications", desc: "Уведомления", priority: "Medium", weight: 3 }
             ],
             "10. Приложения": [
-                { name: "APK version", desc: "APK-версия продукта", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "PWA", desc: "PWA с offline functionality", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "iOS app", desc: "iOS приложение на App Store", priority: "Medium", weight: 3, score: 0, comment: "" },
-                { name: "Push notifications", desc: "Push notifications", priority: "Medium", weight: 3, score: 0, comment: "" }
+                { name: "APK version", desc: "APK", priority: "Medium", weight: 3 },
+                { name: "PWA", desc: "PWA", priority: "Medium", weight: 3 },
+                { name: "iOS app", desc: "iOS", priority: "Medium", weight: 3 },
+                { name: "Push notifications", desc: "Push", priority: "Medium", weight: 3 }
             ]
         };
 
-        let platforms = {};
-        let currentPlatform = "Platform 1";
+        let evaluations = {};
+        let currentEvaluation = {};
 
-        function initializePlatforms() {
-            const saved = localStorage.getItem('igamingPlatforms');
-            if (saved) {
-                platforms = JSON.parse(saved);
-                if (Object.keys(platforms).length > 0) currentPlatform = Object.keys(platforms)[0];
-            } else {
-                platforms = { "Platform 1": JSON.parse(JSON.stringify(criteria)) };
+        function initEvaluations() {
+            const saved = localStorage.getItem('platformEvaluations');
+            evaluations = saved ? JSON.parse(saved) : {};
+            if (Object.keys(evaluations).length === 0) {
+                currentEvaluation = JSON.parse(JSON.stringify(criteria));
             }
+            updateDashboardSelector();
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('igamingPlatforms', JSON.stringify(platforms));
+            localStorage.setItem('platformEvaluations', JSON.stringify(evaluations));
         }
 
-        function getPriorityClass(p) {
-            const map = { "Critical": "priority-critical", "High": "priority-high", "Medium": "priority-medium" };
-            return map[p] || "";
+        function savePlatformEvaluation() {
+            const evaluator = document.getElementById("evaluator-name").value.trim() || "Anonymous";
+            const platformName = document.getElementById("platform-name").value.trim() || "Platform 1";
+            
+            if (!evaluator || !platformName) {
+                alert("Заполни имя и платформу!");
+                return;
+            }
+
+            const key = `${platformName}_${evaluator}_${new Date().getTime()}`;
+            evaluations[key] = {
+                evaluator: evaluator,
+                platform: platformName,
+                timestamp: new Date().toLocaleString('ru-RU'),
+                data: JSON.parse(JSON.stringify(currentEvaluation))
+            };
+
+            saveToLocalStorage();
+            updateDashboardSelector();
+            renderComparisonTab();
+            showSuccessMessage();
+            
+            document.getElementById("evaluator-name").value = "";
+            document.getElementById("platform-name").value = "";
+        }
+
+        function updateDashboardSelector() {
+            const selector = document.getElementById("dashboard-selector");
+            selector.innerHTML = '<option value="">-- Выбрать --</option>';
+            
+            Object.keys(evaluations).forEach(key => {
+                const eval_data = evaluations[key];
+                const option = document.createElement("option");
+                option.value = key;
+                option.textContent = `${eval_data.platform} (${eval_data.evaluator}) - ${eval_data.timestamp}`;
+                selector.appendChild(option);
+            });
+        }
+
+        function switchDashboardPlatform(key) {
+            if (!key) {
+                currentEvaluation = {};
+                renderDashboard();
+                return;
+            }
+            currentEvaluation = JSON.parse(JSON.stringify(evaluations[key].data));
+            renderDashboard();
         }
 
         function renderEvaluationTable() {
@@ -252,33 +301,41 @@
             tbody.innerHTML = "";
             let currentSection = "";
 
-            Object.entries(platforms[currentPlatform]).forEach(([section, items]) => {
+            Object.entries(criteria).forEach(([section, items]) => {
                 let sectionTotal = 0, sectionWeightTotal = 0;
 
                 items.forEach((item, idx) => {
-                    const weighted = (item.score * item.weight).toFixed(2);
-                    sectionTotal += item.score * item.weight;
+                    const score = currentEvaluation[section]?.[idx]?.score || 0;
+                    const comment = currentEvaluation[section]?.[idx]?.comment || "";
+                    const weighted = (score * item.weight).toFixed(2);
+                    sectionTotal += score * item.weight;
                     sectionWeightTotal += item.weight;
 
-                    const descriptor = scoreDescriptors[item.name] && item.score ? `<span class="score-descriptor">${scoreDescriptors[item.name][item.score]}</span>` : '';
+                    const descriptor = scoreDescriptors[item.name]?.[score] || '';
+                    const tooltip = descriptor ? ` title="${descriptor}"` : '';
 
                     tbody.innerHTML += `
                         <tr>
                             <td>${currentSection !== section ? section : ""}</td>
                             <td><strong>${item.name}</strong></td>
                             <td style="font-size: 12px; color: #666;">${item.desc}</td>
-                            <td><span class="${getPriorityClass(item.priority)}">${item.priority}</span></td>
-                            <td><input type="number" min="1" max="5" value="${item.weight}" onchange="updateWeight('${section}', ${idx}, this.value)"></td>
-                            <td><select onchange="updateScore('${section}', ${idx}, this.value)">
-                                <option value="0">—</option>
-                                <option value="1" ${item.score === 1 ? 'selected' : ''}>1 - Плохо</option>
-                                <option value="2" ${item.score === 2 ? 'selected' : ''}>2 - Слабо</option>
-                                <option value="3" ${item.score === 3 ? 'selected' : ''}>3 - Среднее</option>
-                                <option value="4" ${item.score === 4 ? 'selected' : ''}>4 - Хорошо</option>
-                                <option value="5" ${item.score === 5 ? 'selected' : ''}>5 - Отлично</option>
-                            </select>${descriptor}</td>
+                            <td><span style="background: ${item.priority === 'Critical' ? '#ffcdd2' : '#ffe0b2'}; color: ${item.priority === 'Critical' ? '#c62828' : '#e65100'}; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px;">${item.priority}</span></td>
+                            <td>${item.weight}</td>
+                            <td>
+                                <div class="score-select-wrapper">
+                                    <select onchange="updateEvalScore('${section}', ${idx}, this.value)"${tooltip}>
+                                        <option value="0">—</option>
+                                        <option value="1" ${score === 1 ? 'selected' : ''}>1 - Плохо</option>
+                                        <option value="2" ${score === 2 ? 'selected' : ''}>2 - Слабо</option>
+                                        <option value="3" ${score === 3 ? 'selected' : ''}>3 - Среднее</option>
+                                        <option value="4" ${score === 4 ? 'selected' : ''}>4 - Хорошо</option>
+                                        <option value="5" ${score === 5 ? 'selected' : ''}>5 - Отлично</option>
+                                    </select>
+                                    ${descriptor ? `<div class="score-tooltip">${descriptor}</div>` : ''}
+                                </div>
+                            </td>
                             <td style="text-align: center;">${weighted}</td>
-                            <td><textarea onchange="updateComment('${section}', ${idx}, this.value)">${item.comment}</textarea></td>
+                            <td><textarea onchange="updateEvalComment('${section}', ${idx}, this.value)">${comment}</textarea></td>
                         </tr>
                     `;
                     currentSection = section;
@@ -288,8 +345,7 @@
                 tbody.innerHTML += `
                     <tr class="section-total">
                         <td colspan="2"><strong>${section} Total</strong></td>
-                        <td></td><td></td>
-                        <td><strong>${sectionWeightTotal}</strong></td>
+                        <td></td><td></td><td><strong>${sectionWeightTotal}</strong></td>
                         <td style="text-align: center;"><strong>${avgScore}</strong></td>
                         <td style="text-align: center;"><strong>${sectionTotal.toFixed(2)}</strong></td>
                         <td></td>
@@ -298,79 +354,49 @@
             });
         }
 
-        function updateScore(section, idx, value) {
-            platforms[currentPlatform][section][idx].score = parseInt(value) || 0;
+        function updateEvalScore(section, idx, value) {
+            if (!currentEvaluation[section]) currentEvaluation[section] = [];
+            if (!currentEvaluation[section][idx]) currentEvaluation[section][idx] = {};
+            currentEvaluation[section][idx].score = parseInt(value) || 0;
             renderEvaluationTable();
-            updateDashboard();
-            saveToLocalStorage();
         }
 
-        function updateWeight(section, idx, value) {
-            platforms[currentPlatform][section][idx].weight = parseInt(value) || 1;
-            renderEvaluationTable();
-            updateDashboard();
-            saveToLocalStorage();
-        }
-
-        function updateComment(section, idx, value) {
-            platforms[currentPlatform][section][idx].comment = value;
-            saveToLocalStorage();
+        function updateEvalComment(section, idx, value) {
+            if (!currentEvaluation[section]) currentEvaluation[section] = [];
+            if (!currentEvaluation[section][idx]) currentEvaluation[section][idx] = {};
+            currentEvaluation[section][idx].comment = value;
         }
 
         function calculateOverallScore() {
             let totalWeighted = 0, totalWeight = 0;
-            Object.values(platforms[currentPlatform]).forEach(items => {
-                items.forEach(item => {
-                    totalWeighted += item.score * item.weight;
+            Object.entries(criteria).forEach(([section, items]) => {
+                items.forEach((item, idx) => {
+                    const score = currentEvaluation[section]?.[idx]?.score || 0;
+                    totalWeighted += score * item.weight;
                     totalWeight += item.weight;
                 });
             });
             return totalWeight > 0 ? (totalWeighted / totalWeight) : 0;
         }
 
-        function calculateSectionScores() {
-            const scores = {};
-            Object.entries(platforms[currentPlatform]).forEach(([section, items]) => {
-                let sectionWeighted = 0, sectionWeight = 0;
-                items.forEach(item => {
-                    sectionWeighted += item.score * item.weight;
-                    sectionWeight += item.weight;
-                });
-                scores[section] = sectionWeight > 0 ? (sectionWeighted / sectionWeight) : 0;
-            });
-            return scores;
-        }
+        function renderDashboard() {
+            if (!Object.keys(criteria).length) {
+                document.getElementById("overall-score").textContent = "0.00";
+                return;
+            }
 
-        function getStatusClass(score) {
-            if (score >= 4.5) return "status-excellent";
-            if (score >= 4) return "status-strong";
-            if (score >= 3) return "status-average";
-            if (score >= 2) return "status-weak";
-            return "status-critical";
-        }
-
-        function getStatusText(score) {
-            if (score >= 4.5) return "Excellent";
-            if (score >= 4) return "Strong";
-            if (score >= 3) return "Average";
-            if (score >= 2) return "Weak";
-            return "Critical gaps";
-        }
-
-        function updateDashboard() {
             const overall = calculateOverallScore();
             document.getElementById("overall-score").textContent = overall.toFixed(2);
-            document.getElementById("overall-status").textContent = getStatusText(overall);
-            document.getElementById("overall-status").className = "kpi-status " + getStatusClass(overall);
-
+            
             let criticalGaps = 0, strongPoints = 0;
             const scoreCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
-            Object.values(platforms[currentPlatform]).forEach(items => {
-                items.forEach(item => {
-                    if (item.score <= 2) criticalGaps++;
-                    if (item.score >= 4) strongPoints++;
-                    scoreCounts[item.score]++;
+            Object.entries(criteria).forEach(([section, items]) => {
+                items.forEach((item, idx) => {
+                    const score = currentEvaluation[section]?.[idx]?.score || 0;
+                    if (score <= 2) criticalGaps++;
+                    if (score >= 4) strongPoints++;
+                    scoreCounts[score]++;
                 });
             });
 
@@ -381,44 +407,60 @@
             document.getElementById("stat-3").textContent = scoreCounts[3];
             document.getElementById("stat-weak").textContent = scoreCounts[1] + scoreCounts[2];
 
-            const sectionScores = calculateSectionScores();
-            let weakest = Object.entries(sectionScores).sort((a, b) => a[1] - b[1])[0];
-            document.getElementById("weakest-section").textContent = weakest[0].replace(/^\d+\. /, "");
-
-            renderSectionScores(sectionScores);
-            updateCharts(sectionScores);
+            renderSectionScores();
+            updateCharts();
         }
 
-        function renderSectionScores(sectionScores) {
+        function renderSectionScores() {
             const container = document.getElementById("section-scores-container");
-            const sorted = Object.entries(sectionScores).sort((a, b) => b[1] - a[1]);
-            container.innerHTML = "<div style='font-weight: 600; margin-bottom: 15px; color: #667eea;'>Section Scores</div>";
-            sorted.forEach(([section, score]) => {
-                const barWidth = (score / 5) * 100;
+            const sectionScores = {};
+            
+            Object.entries(criteria).forEach(([section, items]) => {
+                let sectionWeighted = 0, sectionWeight = 0;
+                items.forEach((item, idx) => {
+                    const score = currentEvaluation[section]?.[idx]?.score || 0;
+                    sectionWeighted += score * item.weight;
+                    sectionWeight += item.weight;
+                });
+                sectionScores[section] = { score: sectionWeight > 0 ? (sectionWeighted / sectionWeight) : 0, weighted: sectionWeighted.toFixed(2), weight: sectionWeight };
+            });
+
+            const sorted = Object.entries(sectionScores).sort((a, b) => b[1].score - a[1].score);
+            
+            container.innerHTML = "<div style='font-weight: 600; margin-bottom: 15px; color: #667eea;'>Section Scores (Ranked)</div>";
+            sorted.forEach(([section, data]) => {
+                const barWidth = (data.score / 5) * 100;
                 container.innerHTML += `
                     <div class="section-score-row">
                         <div>${section}</div>
                         <div style="flex: 1; margin: 0 15px; background: #eee; border-radius: 4px; height: 8px;">
                             <div style="width: ${barWidth}%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);"></div>
                         </div>
-                        <div class="section-score-value">${score.toFixed(2)}</div>
+                        <div class="section-score-value" title="Score: ${data.score.toFixed(2)}, Weighted: ${data.weighted}">${data.score.toFixed(2)}</div>
+                        <div style="min-width: 80px; text-align: right; font-size: 11px; color: #999;">W: ${data.weighted}</div>
                     </div>
                 `;
             });
         }
 
-        function updateCharts(sectionScores) {
-            const sections = Object.keys(sectionScores).map(s => s.replace(/^\d+\. /, ""));
-            const scores = Object.values(sectionScores);
+        function updateCharts() {
+            const sections = Object.keys(criteria).map(s => s.replace(/^\d+\. /, ""));
+            const scores = Object.keys(criteria).map(section => {
+                const items = criteria[section];
+                let sectionWeighted = 0, sectionWeight = 0;
+                items.forEach((item, idx) => {
+                    const score = currentEvaluation[section]?.[idx]?.score || 0;
+                    sectionWeighted += score * item.weight;
+                    sectionWeight += item.weight;
+                });
+                return sectionWeight > 0 ? (sectionWeighted / sectionWeight) : 0;
+            });
 
             const radarCtx = document.getElementById("radarChart").getContext("2d");
             if (window.radarChart) window.radarChart.destroy();
             window.radarChart = new Chart(radarCtx, {
                 type: "radar",
-                data: {
-                    labels: sections,
-                    datasets: [{ label: currentPlatform, data: scores, borderColor: "#667eea", backgroundColor: "rgba(102, 126, 234, 0.1)", fill: true }]
-                },
+                data: { labels: sections, datasets: [{ label: "Score", data: scores, borderColor: "#667eea", backgroundColor: "rgba(102, 126, 234, 0.1)", fill: true }] },
                 options: { responsive: true, scales: { r: { beginAtZero: true, max: 5 } }, plugins: { legend: { display: true, position: 'bottom' }, title: { display: true, text: 'Section Scores' } } }
             });
 
@@ -426,160 +468,111 @@
             if (window.barChart) window.barChart.destroy();
             window.barChart = new Chart(barCtx, {
                 type: "bar",
-                data: {
-                    labels: sections,
-                    datasets: [{ label: currentPlatform, data: scores, backgroundColor: scores.map(s => s >= 4.5 ? "#4caf50" : s >= 4 ? "#8bc34a" : s >= 3 ? "#ffc107" : s >= 2 ? "#ff9800" : "#f44336") }]
-                },
+                data: { labels: sections, datasets: [{ label: "Score", data: scores, backgroundColor: scores.map(s => s >= 4.5 ? "#4caf50" : s >= 4 ? "#8bc34a" : s >= 3 ? "#ffc107" : s >= 2 ? "#ff9800" : "#f44336") }] },
                 options: { responsive: true, indexAxis: 'y', scales: { x: { beginAtZero: true, max: 5 } }, plugins: { legend: { display: false } } }
             });
         }
 
-        function setPlatformName() {
-            const newName = document.getElementById("platform-name").value.trim() || "Platform 1";
-            if (!platforms[newName]) {
-                platforms[newName] = JSON.parse(JSON.stringify(criteria));
-                addPlatformForComparison(newName);
+        function renderComparisonTab() {
+            const container = document.getElementById("evaluations-list");
+            if (Object.keys(evaluations).length === 0) {
+                container.innerHTML = '<div class="info-box">Пока нет сохраненных оценок. Сначала заполни и сохрани оценку.</div>';
+                return;
             }
-            currentPlatform = newName;
-            updateDashboard();
-            renderEvaluationTable();
-            renderComparison();
-            saveToLocalStorage();
+
+            container.innerHTML = '';
+            Object.entries(evaluations).forEach(([key, eval_data]) => {
+                const overall = calculateScoreForEval(eval_data.data);
+                container.innerHTML += `
+                    <div class="evaluation-item">
+                        <div>
+                            <div class="evaluation-item-name">${eval_data.platform}</div>
+                            <div style="font-size: 12px; color: #999;">${eval_data.evaluator} • ${eval_data.timestamp}</div>
+                        </div>
+                        <div class="evaluation-item-score">${overall.toFixed(2)}</div>
+                        <div class="evaluation-item-actions">
+                            <button class="btn-view" onclick="viewEvaluation('${key}')">View</button>
+                            <button class="btn-download" onclick="downloadEvaluation('${key}')">📥</button>
+                            <button class="btn-delete" onclick="deleteEvaluation('${key}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function calculateScoreForEval(evalData) {
+            let totalWeighted = 0, totalWeight = 0;
+            Object.entries(criteria).forEach(([section, items]) => {
+                items.forEach((item, idx) => {
+                    const score = evalData[section]?.[idx]?.score || 0;
+                    totalWeighted += score * item.weight;
+                    totalWeight += item.weight;
+                });
+            });
+            return totalWeight > 0 ? (totalWeighted / totalWeight) : 0;
+        }
+
+        function viewEvaluation(key) {
+            currentEvaluation = JSON.parse(JSON.stringify(evaluations[key].data));
+            switchTab('dashboard');
+            updateDashboardSelector();
+            document.getElementById("dashboard-selector").value = key;
+            renderDashboard();
+        }
+
+        function deleteEvaluation(key) {
+            if (confirm("Удалить эту оценку?")) {
+                delete evaluations[key];
+                saveToLocalStorage();
+                updateDashboardSelector();
+                renderComparisonTab();
+                showSuccessMessage();
+            }
+        }
+
+        function downloadEvaluation(key) {
+            const eval_data = evaluations[key];
+            const wb = XLSX.utils.book_new();
+            
+            const data = [["Section", "Criterion", "Score", "Weighted Score", "Comment"]];
+            Object.entries(criteria).forEach(([section, items]) => {
+                items.forEach((item, idx) => {
+                    const score = eval_data.data[section]?.[idx]?.score || 0;
+                    const comment = eval_data.data[section]?.[idx]?.comment || "";
+                    data.push([section, item.name, score, (score * item.weight).toFixed(2), comment]);
+                });
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, "Evaluation");
+            XLSX.writeFile(wb, `${eval_data.platform}_${eval_data.evaluator}.xlsx`);
+        }
+
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            
+            const data = [["Section", "Criterion", "Description", "Priority", "Weight", "Score", "Weighted Score", "Comment"]];
+            Object.entries(criteria).forEach(([section, items]) => {
+                items.forEach((item, idx) => {
+                    const score = currentEvaluation[section]?.[idx]?.score || 0;
+                    const comment = currentEvaluation[section]?.[idx]?.comment || "";
+                    data.push([section, item.name, item.desc, item.priority, item.weight, score, (score * item.weight).toFixed(2), comment]);
+                });
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, "Evaluation");
+            XLSX.writeFile(wb, "scorecard.xlsx");
         }
 
         function switchTab(tab) {
             document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
             document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
             document.getElementById(tab).classList.add("active");
-            event.target.classList.add("active");
-        }
-
-        function exportToExcel() {
-            const wb = XLSX.utils.book_new();
-
-            const evaluationData = [["Section", "Criterion", "Description", "Priority", "Weight", "Score", "Weighted Score", "Comment"]];
-            Object.entries(platforms[currentPlatform]).forEach(([section, items]) => {
-                items.forEach(item => {
-                    evaluationData.push([section, item.name, item.desc, item.priority, item.weight, item.score, (item.score * item.weight).toFixed(2), item.comment]);
-                });
-            });
-
-            const ws_eval = XLSX.utils.aoa_to_sheet(evaluationData);
-            XLSX.utils.book_append_sheet(wb, ws_eval, "Evaluation");
-
-            const dashboardData = [
-                ["DASHBOARD", ""],
-                ["Overall Platform Score", calculateOverallScore().toFixed(2)],
-                ["Critical Gaps", Object.values(platforms[currentPlatform]).flat().filter(i => i.score <= 2).length],
-                ["Strong Points", Object.values(platforms[currentPlatform]).flat().filter(i => i.score >= 4).length],
-                ["", ""],
-                ["Section Scores", ""]
-            ];
-
-            const sectionScores = calculateSectionScores();
-            Object.entries(sectionScores).forEach(([section, score]) => {
-                dashboardData.push([section, score.toFixed(2)]);
-            });
-
-            const ws_dash = XLSX.utils.aoa_to_sheet(dashboardData);
-            XLSX.utils.book_append_sheet(wb, ws_dash, "Dashboard");
-
-            const comparisonData = [["Section", ...Object.keys(platforms)]];
-            Object.keys(criteria).forEach(section => {
-                const row = [section];
-                Object.keys(platforms).forEach(platform => {
-                    const sectionItems = platforms[platform][section];
-                    let sectionWeighted = 0, sectionWeight = 0;
-                    sectionItems.forEach(item => {
-                        sectionWeighted += item.score * item.weight;
-                        sectionWeight += item.weight;
-                    });
-                    row.push(sectionWeight > 0 ? (sectionWeighted / sectionWeight).toFixed(2) : "—");
-                });
-                comparisonData.push(row);
-            });
-
-            const ws_comp = XLSX.utils.aoa_to_sheet(comparisonData);
-            XLSX.utils.book_append_sheet(wb, ws_comp, "Comparison");
-
-            XLSX.writeFile(wb, `B2B_iGaming_Scorecard_${currentPlatform}.xlsx`);
-            showSuccessMessage();
-        }
-
-        function exportToJSON() {
-            const data = { platform: currentPlatform, overall_score: calculateOverallScore().toFixed(2), sections: calculateSectionScores(), criteria: platforms[currentPlatform] };
-            const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `scorecard_${currentPlatform}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function addPlatformForComparison(name = null) {
-            const platformName = name || document.getElementById("new-platform-name").value.trim();
-            if (!platformName) return;
-            if (!platforms[platformName]) {
-                platforms[platformName] = JSON.parse(JSON.stringify(criteria));
-                if (!name) document.getElementById("new-platform-name").value = "";
-            }
-            saveToLocalStorage();
-            renderComparison();
-        }
-
-        function renderComparison() {
-            const thead = document.getElementById("comparison-thead");
-            const tbody = document.getElementById("comparison-tbody");
-            const ranking = document.getElementById("platform-ranking");
-
-            thead.innerHTML = "<tr><th>Section</th>";
-            Object.keys(platforms).forEach(platform => {
-                thead.innerHTML += `<th>${platform}</th>`;
-            });
-            thead.innerHTML += "</tr>";
-
-            const platformScores = {};
-            Object.entries(platforms).forEach(([platform, sections]) => {
-                let totalWeighted = 0, totalWeight = 0;
-                Object.values(sections).forEach(items => {
-                    items.forEach(item => {
-                        totalWeighted += item.score * item.weight;
-                        totalWeight += item.weight;
-                    });
-                });
-                platformScores[platform] = totalWeight > 0 ? (totalWeighted / totalWeight) : 0;
-            });
-
-            tbody.innerHTML = "";
-            Object.keys(criteria).forEach(section => {
-                let row = `<tr><td><strong>${section}</strong></td>`;
-                Object.keys(platforms).forEach(platform => {
-                    const sectionItems = platforms[platform][section];
-                    let sectionWeighted = 0, sectionWeight = 0;
-                    sectionItems.forEach(item => {
-                        sectionWeighted += item.score * item.weight;
-                        sectionWeight += item.weight;
-                    });
-                    const score = sectionWeight > 0 ? (sectionWeighted / sectionWeight).toFixed(2) : "—";
-                    row += `<td style="text-align: center; font-weight: 600;">${score}</td>`;
-                });
-                row += "</tr>";
-                tbody.innerHTML += row;
-            });
-
-            const sorted = Object.entries(platformScores).sort((a, b) => b[1] - a[1]);
-            ranking.innerHTML = "";
-            sorted.forEach(([platform, score], idx) => {
-                const medal = ["🥇", "🥈", "🥉"][idx] || "•";
-                ranking.innerHTML += `
-                    <div class="section-score-row">
-                        <div>${medal} ${platform}</div>
-                        <div class="section-score-value">${score.toFixed(2)}</div>
-                    </div>
-                `;
-            });
+            event.target?.classList.add("active");
+            
+            if (tab === 'comparison') renderComparisonTab();
+            if (tab === 'dashboard') renderDashboard();
         }
 
         function showSuccessMessage() {
@@ -588,10 +581,9 @@
             setTimeout(() => msg.classList.remove("show"), 2000);
         }
 
-        initializePlatforms();
+        initEvaluations();
         renderEvaluationTable();
-        updateDashboard();
-        renderComparison();
+        renderComparisonTab();
     </script>
 </body>
 </html>
