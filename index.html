@@ -522,22 +522,18 @@
             return scoreCount > 0 ? (totalScore / scoreCount) : 0;
         }
 
-        // Взвешенная оценка по всем секциям (среднее взвешенных оценок)
+        // Взвешенная оценка по всем критериям (среднее взвешенное всех 65 критериев)
         function calculateOverallWeightedScore() {
-            let sectionWeightedScores = [];
+            let totalWeighted = 0, totalWeight = 0;
             Object.entries(criteria).forEach(([section, items]) => {
-                let sectionWeighted = 0, sectionWeight = 0;
                 items.forEach((item, idx) => {
                     const score = currentEvaluation[section]?.[idx]?.score || 0;
-                    sectionWeighted += score * item.weight;
-                    sectionWeight += item.weight;
+                    totalWeighted += score * item.weight;
+                    totalWeight += item.weight;
                 });
-                if (sectionWeight > 0) {
-                    sectionWeightedScores.push(sectionWeighted / sectionWeight);
-                }
             });
-            const average = sectionWeightedScores.length > 0 ? (sectionWeightedScores.reduce((a, b) => a + b, 0) / sectionWeightedScores.length) : 0;
-            return { weighted: average, weight: 1 };
+            const weighted = totalWeight > 0 ? (totalWeighted / totalWeight) : 0;
+            return { weighted: weighted, weight: 1 };
         }
 
         function renderDashboard() {
@@ -828,7 +824,7 @@
                             <div style="font-size: 12px; color: #333; margin-top: 5px; font-weight: 600;">Avg Weighted Score</div>
                         </div>
                         <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 28px; font-weight: normal; color: #999;">${overall.toFixed(2)}</div>
+                            <div style="font-size: 28px; font-weight: bold; color: #667eea;">${overall.toFixed(2)}</div>
                             <div style="font-size: 12px; color: #999; margin-top: 5px;">Avg Score</div>
                         </div>
                         <div style="background: #ffebee; padding: 15px; border-radius: 8px; text-align: center;">
@@ -871,7 +867,7 @@
                 html += `
                     <div style="margin-bottom: 12px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <div style="font-size: 13px; font-weight: 600; color: #333;">${section}</div>
+                            <div style="font-size: 13px; font-weight: 600; color: #333; min-width: 200px;">${section}</div>
                             <div style="font-size: 13px; font-weight: 600; color: #667eea;">${data.score.toFixed(2)}</div>
                         </div>
                         <div style="width: 100%; height: 8px; background: #eee; border-radius: 4px; overflow: hidden;">
