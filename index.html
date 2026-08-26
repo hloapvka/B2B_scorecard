@@ -965,11 +965,12 @@
             }
 
             const evalId = generateEvalId();
+            // Кодируем данные в JSON строку для совместимости с Firebase
             const evalData = {
                 evaluator: evaluator,
                 platform: platformName,
                 timestamp: new Date().toLocaleString('ru-RU'),
-                data: JSON.parse(JSON.stringify(currentEvaluation))
+                data: JSON.stringify(currentEvaluation)
             };
 
             db.ref(`evaluations/${evalId}`).set(evalData).then(() => {
@@ -985,6 +986,7 @@
                 showSuccessMessage();
             }).catch(err => {
                 alert("❌ Ошибка при сохранении: " + err.message);
+                console.error("Firebase save error:", err);
             });
         }
 
@@ -997,19 +999,25 @@
                 db.ref(`evaluations/${evalId}`).once('value', (snapshot) => {
                     if (snapshot.exists()) {
                         const data = snapshot.val();
-                        currentEvaluation = data.data;
-                        document.getElementById("evaluator-name").value = data.evaluator;
-                        document.getElementById("platform-name").value = data.platform;
-                        renderEvaluationTable();
-                        renderComparisonTab();
-                        renderDashboard();
+                        // Декодируем JSON обратно
+                        try {
+                            currentEvaluation = JSON.parse(data.data);
+                            document.getElementById("evaluator-name").value = data.evaluator;
+                            document.getElementById("platform-name").value = data.platform;
+                            renderEvaluationTable();
+                            renderComparisonTab();
+                            renderDashboard();
 
-                        const msg = document.querySelector('.info-box');
-                        if (msg) {
-                            msg.innerHTML = `✅ <strong>Загружена оценка ${data.evaluator}</strong> для платформы <strong>${data.platform}</strong><br>Сделана: ${data.timestamp}`;
-                            msg.style.background = '#e8f5e9';
-                            msg.style.borderLeftColor = '#4caf50';
-                            msg.style.color = '#2e7d32';
+                            const msg = document.querySelector('.info-box');
+                            if (msg) {
+                                msg.innerHTML = `✅ <strong>Загружена оценка ${data.evaluator}</strong> для платформы <strong>${data.platform}</strong><br>Сделана: ${data.timestamp}`;
+                                msg.style.background = '#e8f5e9';
+                                msg.style.borderLeftColor = '#4caf50';
+                                msg.style.color = '#2e7d32';
+                            }
+                        } catch (e) {
+                            console.error("Error parsing evaluation data:", e);
+                            alert("❌ Ошибка при загрузке оценки");
                         }
                     }
                 });
