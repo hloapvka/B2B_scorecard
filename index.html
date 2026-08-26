@@ -721,6 +721,18 @@
             if (deleteKey) {
                 delete evaluations[deleteKey];
                 saveToLocalStorage();
+
+                // Удалить из Firebase
+                if (firebaseEnabled) {
+                    db.ref(`all_evaluations/${deleteKey}`).remove()
+                        .then(() => {
+                            console.log("✅ Оценка удалена из Firebase");
+                        })
+                        .catch(err => {
+                            console.error("❌ Ошибка удаления из Firebase:", err.message);
+                        });
+                }
+
                 updateDashboardSelector();
                 renderComparisonTab();
                 showSuccessMessage();
