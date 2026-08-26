@@ -146,7 +146,8 @@
             </div>
 
             <div id="kpi-container" class="dashboard">
-                <div class="kpi-card"><div class="kpi-label">Overall Score</div><div class="kpi-value" id="overall-score">0.00</div></div>
+                <div class="kpi-card"><div class="kpi-label">Overall Weighted Score (Primary)</div><div class="kpi-value" id="overall-weighted-score" style="color: #667eea; font-weight: 700;">0.00</div></div>
+                <div class="kpi-card"><div class="kpi-label">Overall Score (Average)</div><div class="kpi-value" id="overall-score" style="color: #999;">0.00</div></div>
                 <div class="kpi-card"><div class="kpi-label">Critical Gaps</div><div class="kpi-value" id="critical-gaps">0</div></div>
                 <div class="kpi-card"><div class="kpi-label">Strong Points</div><div class="kpi-value" id="strong-points">0</div></div>
             </div>
@@ -522,14 +523,32 @@
             return totalWeight > 0 ? (totalWeighted / totalWeight) : 0;
         }
 
+        // Взвешенный скор - сумма всех взвешенных оценок / сумма весов
+        function calculateOverallWeightedScore() {
+            let totalWeighted = 0, totalWeight = 0;
+            Object.entries(criteria).forEach(([section, items]) => {
+                items.forEach((item, idx) => {
+                    const score = currentEvaluation[section]?.[idx]?.score || 0;
+                    totalWeighted += score * item.weight;
+                    totalWeight += item.weight;
+                });
+            });
+            return { weighted: totalWeighted, weight: totalWeight };
+        }
+
         function renderDashboard() {
             if (!Object.keys(criteria).length) {
                 document.getElementById("overall-score").textContent = "0.00";
+                document.getElementById("overall-weighted-score").textContent = "0.00";
                 return;
             }
 
             const overall = calculateOverallScore();
+            const { weighted, weight } = calculateOverallWeightedScore();
+            const overallWeighted = weight > 0 ? (weighted / weight) : 0;
+
             document.getElementById("overall-score").textContent = overall.toFixed(2);
+            document.getElementById("overall-weighted-score").textContent = overallWeighted.toFixed(2);
 
             let criticalGaps = 0, strongPoints = 0;
             const scoreCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
@@ -765,6 +784,9 @@
             currentEvaluation = JSON.parse(JSON.stringify(eval_data.data));
 
             const overall = calculateOverallScore();
+            const { weighted, weight } = calculateOverallWeightedScore();
+            const overallWeighted = weight > 0 ? (weighted / weight) : 0;
+
             let criticalGaps = 0, strongPoints = 0;
             Object.entries(criteria).forEach(([section, items]) => {
                 items.forEach((item, idx) => {
@@ -784,8 +806,12 @@
                     <h3 style="color: #667eea; margin-bottom: 15px;">Dashboard</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
                         <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 28px; font-weight: bold; color: #667eea;">${overall.toFixed(2)}</div>
-                            <div style="font-size: 12px; color: #999; margin-top: 5px;">Overall Score</div>
+                            <div style="font-size: 28px; font-weight: bold; color: #667eea;">${overallWeighted.toFixed(2)}</div>
+                            <div style="font-size: 12px; color: #333; margin-top: 5px; font-weight: 600;">Overall Weighted Score</div>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 28px; font-weight: normal; color: #999;">${overall.toFixed(2)}</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 5px;">Overall Score (Avg)</div>
                         </div>
                         <div style="background: #ffebee; padding: 15px; border-radius: 8px; text-align: center;">
                             <div style="font-size: 28px; font-weight: bold; color: #f44336;">${criticalGaps}</div>
