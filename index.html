@@ -17,12 +17,6 @@
         .kpi-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
         .kpi-value { font-size: 48px; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 10px 0; }
         .kpi-label { font-size: 12px; text-transform: uppercase; color: #999; letter-spacing: 1px; }
-        .kpi-status { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 10px; }
-        .status-excellent { background: #d4edda; color: #155724; }
-        .status-strong { background: #cce5ff; color: #004085; }
-        .status-average { background: #fff3cd; color: #856404; }
-        .status-weak { background: #f8d7da; color: #721c24; }
-        .status-critical { background: #f5c6cb; color: #721c24; font-weight: bold; }
         .controls { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         .platform-input { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .platform-input input { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; min-width: 200px; }
@@ -43,12 +37,10 @@
         .section-total { background: #f9f9f9; font-weight: 600; border-top: 2px solid #667eea; }
         input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; }
         textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; resize: vertical; min-height: 60px; max-height: 150px; }
-        .score-descriptor { font-size: 11px; color: #999; font-style: italic; margin-top: 3px; display: block; max-width: 250px; }
         .score-descriptor-box { background: #f5f5f5; border-left: 3px solid #667eea; padding: 8px 12px; margin-top: 8px; border-radius: 4px; font-size: 12px; color: #666; display: inline-block; }
         .score-select-wrapper { position: relative; }
-        .score-tooltip { position: absolute; bottom: 100%; left: 0; background: #333; color: white; padding: 6px 10px; border-radius: 3px; font-size: 11px; white-space: nowrap; margin-bottom: 3px; z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .score-tooltip { position: absolute; bottom: 100%; left: 0; background: #333; color: white; padding: 6px 10px; border-radius: 3px; font-size: 11px; white-space: nowrap; margin-bottom: 3px; z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.2s; max-width: 300px; white-space: normal; }
         .score-select-wrapper select:hover ~ .score-tooltip { opacity: 1; }
-        .score-select-wrapper select option:hover::after { content: attr(data-tooltip); }
         .priority-critical { background: #ffcdd2; color: #c62828; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
         .priority-high { background: #ffe0b2; color: #e65100; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
         .priority-medium { background: #fff9c4; color: #f57f17; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
@@ -71,10 +63,22 @@
         .btn-delete { background: #f44336; color: white; }
         .btn-download { background: #2196F3; color: white; }
         .btn-view { background: #667eea; color: white; }
-        .btn-download-xlsx { background: #ff9800; color: white; }
-        .btn-export-sheets { background: #34a853; color: white; }
         .dashboard-selector { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .dashboard-selector select { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; max-width: 300px; }
+        .comparison-result { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .comparison-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .comparison-table th { background: #f5f5f5; color: #333; padding: 12px; text-align: center; font-weight: 600; border-bottom: 2px solid #ddd; }
+        .comparison-table td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
+        .comparison-table th:first-child, .comparison-table td:first-child { text-align: left; }
+        #delete-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center; }
+        #delete-modal > div { background: white; border-radius: 12px; padding: 30px; max-width: 400px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+        #view-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2500; overflow-y: auto; }
+        #view-modal > div { background: white; margin: 20px auto; border-radius: 12px; max-width: 1200px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+        .modal-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .modal-content { padding: 20px; }
+        .compare-controls { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+        .compare-btn { background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .clear-btn { background: #f5f5f5; color: #333; padding: 10px 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: 600; }
         @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } .charts-grid { grid-template-columns: 1fr; } th, td { padding: 8px 6px; font-size: 12px; } }
     </style>
 </head>
@@ -126,10 +130,9 @@
             </div>
 
             <div id="kpi-container" class="dashboard">
-                <div class="kpi-card"><div class="kpi-label">Overall Score</div><div class="kpi-value" id="overall-score">0.00</div><div class="kpi-status" id="overall-status">Not evaluated</div></div>
+                <div class="kpi-card"><div class="kpi-label">Overall Score</div><div class="kpi-value" id="overall-score">0.00</div></div>
                 <div class="kpi-card"><div class="kpi-label">Critical Gaps</div><div class="kpi-value" id="critical-gaps">0</div></div>
                 <div class="kpi-card"><div class="kpi-label">Strong Points</div><div class="kpi-value" id="strong-points">0</div></div>
-                <div class="kpi-card"><div class="kpi-label">Weakest Section</div><div style="font-size: 18px; font-weight: 600; color: #333; margin-top: 15px;" id="weakest-section">—</div></div>
             </div>
 
             <div class="summary-stats">
@@ -150,168 +153,167 @@
         <!-- Comparison Tab -->
         <div id="comparison" class="tab-content">
             <div class="info-box">Все сохраненные оценки. Сравнивай разные версии и оценивающих.</div>
-            <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
-                <button id="compare-btn" onclick="compareSelectedEvaluations()" style="background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: none;">📊 Сравнить выбранные</button>
-                <button id="clear-btn" onclick="clearSelectedEvaluations()" style="background: #f5f5f5; color: #333; padding: 10px 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: 600; display: none;">✕ Очистить выбор</button>
+            <div class="compare-controls">
+                <button id="compare-btn" class="compare-btn" onclick="compareSelectedEvaluations()" style="display: none;">📊 Сравнить выбранные</button>
+                <button id="clear-btn" class="clear-btn" onclick="clearSelectedEvaluations()" style="display: none;">✕ Очистить выбор</button>
                 <span id="selected-count" style="font-size: 12px; color: #999;"></span>
             </div>
-            <div id="comparison-result" style="margin-bottom: 20px;"></div>
+            <div id="comparison-result"></div>
             <div id="evaluations-list"></div>
         </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div id="delete-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 12px; padding: 30px; max-width: 400px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);">
+    <div id="delete-modal">
+        <div>
             <h3 style="margin-bottom: 15px; color: #333;">Удалить оценку?</h3>
             <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Вы уверены что хотите удалить эту оценку? Это действие нельзя отменить.</p>
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button onclick="closeDeleteModal()" style="background: #4caf50; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">Оставить</button>
-                <button onclick="confirmDelete()" style="background: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">Удалить</button>
+                <button onclick="closeDeleteModal()" style="background: #4caf50; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Оставить</button>
+                <button onclick="confirmDelete()" style="background: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Удалить</button>
             </div>
         </div>
     </div>
 
     <!-- View Details Modal -->
-    <div id="view-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2500; overflow-y: auto;">
-        <div style="background: white; margin: 20px auto; border-radius: 12px; max-width: 1200px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);">
-            <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee;">
+    <div id="view-modal" onclick="if(event.target === this) closeViewModal()">
+        <div>
+            <div class="modal-header">
                 <h3 id="view-title" style="color: #333;"></h3>
                 <button onclick="closeViewModal()" style="background: #f5f5f5; border: none; cursor: pointer; padding: 8px 12px; border-radius: 4px; font-size: 20px;">✕</button>
             </div>
-            <div style="padding: 20px;">
-                <div id="view-content"></div>
-            </div>
+            <div class="modal-content" id="view-content"></div>
         </div>
     </div>
 
     <script>
         const scoreDescriptors = {
-            "Core flows stability": { 1: "Множество ошибок", 2: "Часто ошибки", 3: "Редко", 4: "Стабильно", 5: "Идеально" },
-            "Mirror rotation": { 1: "Нет ротации", 2: "Нестабильно", 3: "С задержками", 4: "Хорошо", 5: "Идеально" },
-            "Session persistence": { 1: "Теряется", 2: "Часто", 3: "Иногда", 4: "Обычно", 5: "Всегда" },
-            "Frontend performance": { 1: ">5s", 2: "4-5s", 3: "3-4s", 4: "<3s", 5: "<2s" },
-            "Mobile scenarios": { 1: "Не работает", 2: "Множество ошибок", 3: "Работает с проблемами", 4: "Хорошо", 5: "Идеально" },
-            "Game providers": { 1: "1-2 провайдера", 2: "3 провайдера", 3: "4 провайдера", 4: "5+ провайдеров", 5: "Все основные" },
-            "Bonus accuracy": { 1: "Частые ошибки", 2: "Редкие ошибки", 3: "Почти правильно", 4: "Правильно", 5: "100% точно" },
-            "Card payment UI": { 1: "Нет своего UI", 2: "UI с редиректом", 3: "Свой UI но неполный", 4: "Свой UI полный", 5: "Продвинутый UI" },
-            "Player data mapping": { 1: "Ошибки в маппинге", 2: "Неполное маппирование", 3: "Маппирование есть", 4: "Правильное маппирование", 5: "Идеальное маппирование" },
-            "Fallback routing": { 1: "Нет fallback", 2: "Один fallback", 3: "Два fallback", 4: "Три+ fallback", 5: "Автоматический выбор" },
-            "Open Banking": { 1: "Нет", 2: "1 провайдер", 3: "2-3 провайдера", 4: "4-5 провайдеров", 5: "5+ провайдеров" },
-            "Retry on failure": { 1: "Нет", 2: "Ручной retry", 3: "Один автоretry", 4: "Несколько retry", 5: "Оптимальная стратегия" },
-            "1-Click return": { 1: "Нет", 2: "Требует подтверждение", 3: "1-Click но ограничено", 4: "1-Click работает", 5: "1-Click оптимизировано" },
-            "Block configuration": { 1: "Только в коде", 2: "Через админ панель", 3: "Простая CMS", 4: "Полная CMS", 5: "Продвинутая CMS" },
-            "Content segmentation": { 1: "Нет", 2: "По типу юзера", 3: "По нескольким атрибутам", 4: "По многим атрибутам", 5: "Полная персонализация" },
-            "Personalization": { 1: "Нет", 2: "Минимальная", 3: "Частичная", 4: "Хорошая", 5: "Полная" },
-            "Localization": { 1: "Только英語", 2: "2-3 языка", 3: "5+ языков", 4: "10+ языков", 5: "Полная локализация" },
-            "Traffic customization": { 1: "Нет", 2: "Фиксированные варианты", 3: "Несколько вариантов", 4: "Много вариантов", 5: "Полная кастомизация" },
-            "Third-party compat": { 1: "Не работает", 2: "С проблемами", 3: "Частично работает", 4: "Хорошо работает", 5: "Идеально" },
-            "Format flexibility": { 1: "Один формат", 2: "Два формата", 3: "Три формата", 4: "Четыре+ форматов", 5: "Любой формат" },
-            "Post-reg upsell": { 1: "Нет", 2: "Один вариант", 3: "Два варианта", 4: "Три варианта", 5: "Продвинутые апсейлы" },
-            "Product communications": { 1: "Нет информации", 2: "Неполная информация", 3: "Базовая информация", 4: "Полная информация", 5: "Отличные коммуникации" },
-            "UX streamlining": { 1: "5+ шагов", 2: "4 шага", 3: "3 шага", 4: "2 шага", 5: "1 клик" },
-            "Withdrawal clarity": { 1: "Неясные условия", 2: "Частично ясно", 3: "Более или менее ясно", 4: "Ясные условия", 5: "Кристально ясно" },
-            "KYC flow": { 1: "Сложно", 2: "Средне", 3: "Приемлемо", 4: "Просто", 5: "Очень просто" },
-            "Support integration": { 1: "Нет", 2: "Email только", 3: "Email + FAQ", 4: "Чат + Email", 5: "24/7 поддержка" },
-            "Event catalog": { 1: "Нет events", 2: "5-10 events", 3: "10-20 events", 4: "20-50 events", 5: "50+ events" },
-            "Delay config": { 1: "Нет", 2: "Fixed delay", 3: "Несколько опций", 4: "Гибкие опции", 5: "Полный контроль" },
-            "Real-time delivery": { 1: ">10сек", 2: "5-10сек", 3: "1-5сек", 4: "<1сек", 5: "<100ms" },
-            "Event-driven flows": { 1: "Polling только", 2: "Частично events", 3: "Основано на events", 4: "Полностью event-driven", 5: "Оптимизированный" },
-            "Frontend tracking": { 1: "Нет разметки", 2: "Базовая разметка", 3: "Средняя разметка", 4: "Полная разметка", 5: "Продвинутая разметка" },
-            "Event segmentation": { 1: "Нет", 2: "По типу", 3: "По типу и стране", 4: "По многим параметрам", 5: "Полная сегментация" },
-            "Analytics coverage": { 1: "1-2 funnel", 2: "3-4 funnel", 3: "5-6 funnel", 4: "7-8 funnel", 5: "Все funnel" },
-            "Custom events": { 1: "Нет", 2: "Ограничено", 3: "Несколько опций", 4: "Хорошо", 5: "Полная свобода" },
-            "Cohort analysis": { 1: "Нет", 2: "Базовое", 3: "Среднее", 4: "Хорошее", 5: "Продвинутое" },
-            "Revenue attribution": { 1: "Нет", 2: "Базовое", 3: "Среднее", 4: "Правильное", 5: "Продвинутое" },
-            "Bonus clarity": { 1: "Неясные условия", 2: "Частично ясно", 3: "Более ясно", 4: "Ясные условия", 5: "Очень ясно" },
-            "Game search": { 1: "Нет поиска", 2: "Поиск по названию", 3: "Поиск + базовые фильтры", 4: "Развитые фильтры", 5: "Продвинутый поиск" },
-            "Multi-stage": { 1: "Нет", 2: "Два этапа", 3: "Три этапа", 4: "Четыре этапа", 5: "Более четырех" },
-            "Bonus cancellation": { 1: "Нельзя отменить", 2: "Сложная отмена", 3: "Можно отменить", 4: "Легко отменить", 5: "1-Click отмена" },
-            "FS crediting": { 1: "Нет FS", 2: "В игру только", 3: "В кошелек или игру", 4: "Гибкое зачисление", 5: "Полная гибкость" },
-            "Multi-bonus stack": { 1: "Нельзя комбинировать", 2: "Два бонуса", 3: "Три бонуса", 4: "Четыре бонуса", 5: "Неограниченно" },
-            "Loyalty area": { 1: "Нет", 2: "Простая страница", 3: "Базовая функциональность", 4: "Хорошая функциональность", 5: "Полнофункциональная" },
-            "Rewards variety": { 1: "Один тип", 2: "Два типа", 3: "Три типа", 4: "Четыре типа", 5: "Пять+ типов" },
-            "Notifications": { 1: "Нет", 2: "Email только", 3: "Email + в-app", 4: "Email + в-app + SMS", 5: "Email + в-app + SMS + Push" },
-            "APK version": { 1: "Нет", 2: "Устаревшая версия", 3: "Обновляется редко", 4: "Обновляется регулярно", 5: "Всегда актуальна" },
-            "PWA": { 1: "Нет", 2: "Базовое", 3: "Среднее", 4: "Хорошее", 5: "Отличное" },
-            "iOS app": { 1: "Нет", 2: "Web wrapper", 3: "Полуnative", 4: "Native app", 5: "Optimized native" },
-            "Push notifications": { 1: "Нет", 2: "Нестабильные", 3: "Работают", 4: "Хорошо работают", 5: "Идеально работают" }
+            "Core flows stability": { 1: "❌ Не работает / блокирующие ошибки", 2: "⚠️ Частые ошибки в core flows", 3: "✓ Иногда ошибки", 4: "✓✓ Редко ошибки", 5: "✓✓✓ Идеально стабильно" },
+            "Mirror rotation": { 1: "❌ Нет ротации", 2: "⚠️ Нестабильно, теряется сессия", 3: "✓ С задержками", 4: "✓✓ Хорошо работает", 5: "✓✓✓ Идеально автоматически" },
+            "Session persistence": { 1: "❌ Теряется всегда", 2: "⚠️ Часто теряется", 3: "✓ Иногда сохраняется", 4: "✓✓ Обычно сохраняется", 5: "✓✓✓ Всегда сохраняется" },
+            "Frontend performance": { 1: "❌ >5 секунд", 2: "⚠️ 4-5 секунд", 3: "✓ 3-4 секунды", 4: "✓✓ <3s smooth", 5: "✓✓✓ <2s очень быстро" },
+            "Mobile scenarios": { 1: "❌ Не работает на мобильных", 2: "⚠️ Множество ошибок", 3: "✓ Работает с проблемами", 4: "✓✓ Хорошо работает", 5: "✓✓✓ Идеально на всех устройствах" },
+            "Game providers": { 1: "❌ Нет или 1 провайдер", 2: "⚠️ 2-3 основных", 3: "✓ 4 провайдера", 4: "✓✓ 5+ провайдеров", 5: "✓✓✓ Все основные интегрированы" },
+            "Bonus accuracy": { 1: "❌ Частые ошибки в расчетах", 2: "⚠️ Редкие баги", 3: "✓ Почти правильно", 4: "✓✓ Правильный расчет", 5: "✓✓✓ 100% точно всегда" },
+            "Card payment UI": { 1: "❌ Нет своего UI", 2: "⚠️ UI с редиректом", 3: "✓ Свой UI неполный", 4: "✓✓ Свой UI полный", 5: "✓✓✓ Продвинутый UI" },
+            "Player data mapping": { 1: "❌ Ошибки в маппинге", 2: "⚠️ Неполное маппирование", 3: "✓ Маппирование работает", 4: "✓✓ Правильное маппирование", 5: "✓✓✓ Идеальное маппирование" },
+            "Fallback routing": { 1: "❌ Нет fallback", 2: "⚠️ Один fallback", 3: "✓ Два fallback", 4: "✓✓ Три+ fallback", 5: "✓✓✓ Автоматический cascade" },
+            "Open Banking": { 1: "❌ Нет интеграции", 2: "⚠️ 1 провайдер", 3: "✓ 2-3 провайдера", 4: "✓✓ 4-5 провайдеров", 5: "✓✓✓ 5+ крупных провайдеров" },
+            "Retry on failure": { 1: "❌ Нет retry", 2: "⚠️ Только ручной retry", 3: "✓ Автоматический retry", 4: "✓✓ Несколько вариантов", 5: "✓✓✓ Оптимальная стратегия" },
+            "1-Click return": { 1: "❌ Нет 1-Click", 2: "⚠️ Требует подтверждение", 3: "✓ 1-Click но ограничено", 4: "✓✓ 1-Click работает", 5: "✓✓✓ Полностью оптимизировано" },
+            "Block configuration": { 1: "❌ Только в коде", 2: "⚠️ Только админ панель", 3: "✓ Простая CMS", 4: "✓✓ Полная CMS", 5: "✓✓✓ Продвинутая CMS" },
+            "Content segmentation": { 1: "❌ Нет сегментации", 2: "⚠️ Только по типу", 3: "✓ По нескольким параметрам", 4: "✓✓ По многим параметрам", 5: "✓✓✓ Полная детальная" },
+            "Content personalization": { 1: "❌ Нет персонализации", 2: "⚠️ Минимальная", 3: "✓ Частичная персонализация", 4: "✓✓ Хорошая персонализация", 5: "✓✓✓ Полная по всем параметрам" },
+            "Localization": { 1: "❌ Только 1 язык", 2: "⚠️ 2-3 языка", 3: "✓ 5+ языков", 4: "✓✓ 10+ языков", 5: "✓✓✓ Полная локализация" },
+            "Traffic customization": { 1: "❌ Нет кастомизации", 2: "⚠️ Фиксированные варианты", 3: "✓ Несколько вариантов", 4: "✓✓ Много вариантов", 5: "✓✓✓ Полная кастомизация" },
+            "Third-party compatibility": { 1: "❌ Не работает на сторонних", 2: "⚠️ Работает с проблемами", 3: "✓ Частично работает", 4: "✓✓ Хорошо работает", 5: "✓✓✓ Идеально везде" },
+            "Format flexibility": { 1: "❌ Один формат", 2: "⚠️ Два формата", 3: "✓ Три формата", 4: "✓✓ Четыре+ форматов", 5: "✓✓✓ Любой формат" },
+            "Post-reg upsell": { 1: "❌ Нет апсейла", 2: "⚠️ Один вариант", 3: "✓ Два варианта", 4: "✓✓ Три варианта", 5: "✓✓✓ Продвинутые апсейлы" },
+            "Product communications": { 1: "❌ Нет информации", 2: "⚠️ Неполная информация", 3: "✓ Базовая информация", 4: "✓✓ Полная информация", 5: "✓✓✓ Отличные коммуникации" },
+            "UX streamlining": { 1: "❌ 5+ шагов", 2: "⚠️ 4 шага", 3: "✓ 3 шага", 4: "✓✓ 2 шага", 5: "✓✓✓ 1 клик" },
+            "Withdrawal clarity": { 1: "❌ Неясные условия", 2: "⚠️ Частично ясно", 3: "✓ Более ясно", 4: "✓✓ Ясные условия", 5: "✓✓✓ Кристально ясно" },
+            "KYC flow": { 1: "❌ Сложный KYC", 2: "⚠️ Среднесложный", 3: "✓ Приемлемо", 4: "✓✓ Просто", 5: "✓✓✓ Очень простой" },
+            "Support integration": { 1: "❌ Нет поддержки", 2: "⚠️ Email только", 3: "✓ Email + FAQ", 4: "✓✓ Чат + Email", 5: "✓✓✓ Встроенная полная поддержка" },
+            "Event catalog": { 1: "❌ Нет events", 2: "⚠️ 5-10 events", 3: "✓ 10-20 events", 4: "✓✓ 20-50 events", 5: "✓✓✓ 50+ events каталог" },
+            "Delay configuration": { 1: "❌ Нет настройки", 2: "⚠️ Только fixed delay", 3: "✓ Несколько опций", 4: "✓✓ Гибкие опции", 5: "✓✓✓ Полный контроль задержки" },
+            "Real-time delivery": { 1: "❌ >10 секунд", 2: "⚠️ 5-10 секунд", 3: "✓ 1-5 секунд", 4: "✓✓ <1 секунда", 5: "✓✓✓ <100ms real-time" },
+            "Event-driven flows": { 1: "❌ Только polling", 2: "⚠️ Частично events", 3: "✓ Основано на events", 4: "✓✓ Полностью event-driven", 5: "✓✓✓ Оптимизированный" },
+            "Frontend tracking": { 1: "❌ Нет разметки", 2: "⚠️ Базовая разметка", 3: "✓ Средняя разметка", 4: "✓✓ Полная разметка", 5: "✓✓✓ Продвинутая разметка" },
+            "Event segmentation": { 1: "❌ Нет сегментации", 2: "⚠️ По типу только", 3: "✓ По типу и стране", 4: "✓✓ По многим параметрам", 5: "✓✓✓ Полная сегментация" },
+            "Analytics coverage": { 1: "❌ 1-2 funnel", 2: "⚠️ 3-4 funnel", 3: "✓ 5-6 funnel", 4: "✓✓ 7-8 funnel", 5: "✓✓✓ Все key funnels" },
+            "Custom events": { 1: "❌ Нет возможности", 2: "⚠️ Очень ограничено", 3: "✓ Несколько опций", 4: "✓✓ Хорошо настраивается", 5: "✓✓✓ Полная свобода" },
+            "Cohort analysis": { 1: "❌ Нет анализа", 2: "⚠️ Базовое", 3: "✓ Среднее", 4: "✓✓ Хорошее", 5: "✓✓✓ Продвинутое" },
+            "Revenue attribution": { 1: "❌ Нет атрибуции", 2: "⚠️ Базовое", 3: "✓ Среднее", 4: "✓✓ Правильное", 5: "✓✓✓ Продвинутое" },
+            "Bonus clarity": { 1: "❌ Неясные условия", 2: "⚠️ Частично ясно", 3: "✓ Более ясно", 4: "✓✓ Ясные условия", 5: "✓✓✓ Очень ясно" },
+            "Game search": { 1: "❌ Нет поиска", 2: "⚠️ Поиск по названию", 3: "✓ Поиск + фильтры", 4: "✓✓ Развитые фильтры", 5: "✓✓✓ Продвинутый поиск" },
+            "Multi-stage bonuses": { 1: "❌ Нет multi-stage", 2: "⚠️ Два этапа", 3: "✓ Три этапа", 4: "✓✓ Четыре этапа", 5: "✓✓✓ Более четырех" },
+            "Bonus cancellation": { 1: "❌ Нельзя отменить", 2: "⚠️ Сложная отмена", 3: "✓ Можно отменить", 4: "✓✓ Легко отменить", 5: "✓✓✓ 1-Click отмена" },
+            "FS instant crediting": { 1: "❌ Нет FS", 2: "⚠️ Только в игру", 3: "✓ В кошелек или игру", 4: "✓✓ Гибкое зачисление", 5: "✓✓✓ Полная гибкость" },
+            "Multi-bonus stacking": { 1: "❌ Нельзя комбинировать", 2: "⚠️ Два бонуса макс", 3: "✓ Три бонуса", 4: "✓✓ Четыре бонуса", 5: "✓✓✓ Неограниченное" },
+            "Loyalty rewards area": { 1: "❌ Нет программы", 2: "⚠️ Простая страница", 3: "✓ Базовая функциональность", 4: "✓✓ Хорошая функциональность", 5: "✓✓✓ Полнофункциональная" },
+            "Rewards variety": { 1: "❌ Один тип награды", 2: "⚠️ Два типа", 3: "✓ Три типа", 4: "✓✓ Четыре типа", 5: "✓✓✓ Пять+ типов" },
+            "Reward notifications": { 1: "❌ Нет уведомлений", 2: "⚠️ Email только", 3: "✓ Email + в-app", 4: "✓✓ Email + в-app + SMS", 5: "✓✓✓ Все каналы + Push" },
+            "APK version": { 1: "❌ Нет APK", 2: "⚠️ Устаревшая версия", 3: "✓ Обновляется редко", 4: "✓✓ Регулярные обновления", 5: "✓✓✓ Всегда актуальна" },
+            "PWA": { 1: "❌ Нет PWA", 2: "⚠️ Базовое PWA", 3: "✓ Среднее PWA", 4: "✓✓ Хорошее PWA", 5: "✓✓✓ Отличное полнофункциональное" },
+            "iOS app": { 1: "❌ Нет iOS app", 2: "⚠️ Web wrapper", 3: "✓ Полу-native", 4: "✓✓ Native app", 5: "✓✓✓ Оптимизированный native" },
+            "Push notifications": { 1: "❌ Нет push", 2: "⚠️ Нестабильные push", 3: "✓ Push работают", 4: "✓✓ Хорошо работают", 5: "✓✓✓ Идеально работают" }
         };
 
         const criteria = {
             "1. Стабильность работы": [
                 { name: "Core flows stability", desc: "Нет блокирующих ошибок в core flows: регистрация, login, deposit, withdrawal, game launch, bonus activation", priority: "Critical", weight: 5 },
-                { name: "Mirror rotation", desc: "Автоматическая ротация зеркал без потери сессии и данных юзера", priority: "Critical", weight: 5 },
-                { name: "Session persistence", desc: "Сессия сохраняется при переходе между доменами и зеркалами", priority: "High", weight: 4 },
-                { name: "Frontend performance", desc: "Быстрая загрузка main pages <3s на desktop и <5s на mobile", priority: "High", weight: 4 },
-                { name: "Mobile scenarios", desc: "Полная функциональность на мобильных браузерах (iOS Safari, Chrome Mobile)", priority: "High", weight: 4 },
-                { name: "Game providers", desc: "Интеграция с основными провайдерами: Pragmatic, NetEnt, Evolution, Microgaming", priority: "High", weight: 4 },
-                { name: "Bonus accuracy", desc: "Точное начисление бонусов, вейджер, FS без ошибок в расчетах", priority: "Critical", weight: 5 }
+                { name: "Mirror rotation", desc: "Зеркала автоматически ротируются по заданной логике и продолжают обслуживать пользователя при недоступности одного из доменов", priority: "Critical", weight: 5 },
+                { name: "Session persistence", desc: "Авторизованная сессия сохраняется при переходе между активными зеркалами без повторного login", priority: "High", weight: 4 },
+                { name: "Frontend performance", desc: "Быстрый и легкий фронт: загрузка main pages <3s, smooth interactions на всех устройствах", priority: "High", weight: 4 },
+                { name: "Mobile scenarios", desc: "Корректная работа основных пользовательских сценариев на мобильных устройствах и разных разрешениях экранов без ошибок", priority: "High", weight: 4 },
+                { name: "Game providers", desc: "Подключены основные провайдеры и доступны их игры без необходимости отдельной интеграции на стороне оператора", priority: "High", weight: 4 },
+                { name: "Bonus accuracy", desc: "Bonus/FS автоматически начисляются, отображаются на правильном балансе и корректно участвуют в wagering flow", priority: "Critical", weight: 5 }
             ],
             "2. Платежи": [
-                { name: "Card payment UI", desc: "Собственный кастомный UI для карточных платежей без redirect на провайдера", priority: "Critical", weight: 5 },
-                { name: "Player data mapping", desc: "Правильное маппирование данных юзера (имя, адрес, DOB) в платежные системы", priority: "Critical", weight: 5 },
-                { name: "Fallback routing", desc: "Fallback routing при отказе платежа: автоматический выбор альтернативного провайдера", priority: "High", weight: 4 },
-                { name: "Open Banking", desc: "Поддержка Open Banking / Bank Transfers: ≥5 провайдеров интеграции", priority: "High", weight: 4 },
-                { name: "Retry on failure", desc: "Возможность повтора платежа при ошибке, сохранение истории попыток", priority: "Medium", weight: 3 },
-                { name: "1-Click return", desc: "Возврат средств через 1-Click без дополнительных подтверждений (где позволяет регуляция)", priority: "Medium", weight: 3 }
+                { name: "Card payment UI", desc: "Поддерживается собственный card payment UI/frame без необходимости редиректа на внешний merchant UI", priority: "Critical", weight: 5 },
+                { name: "Player data mapping", desc: "Платформа позволяет передавать и маппировать обязательные player/payment data для конкретного PSP без доработки core cashier", priority: "Critical", weight: 5 },
+                { name: "Fallback routing", desc: "Автоматическая маршрутизация при отказе платежа (cascade system)", priority: "High", weight: 4 },
+                { name: "Open Banking", desc: "≥5 крупных Open Banking провайдеров интегрировано", priority: "High", weight: 4 },
+                { name: "Retry on failure", desc: "После failed/cancelled deposit пользователь получает релевантный альтернативный payment method или следующий сценарий пополнения", priority: "Medium", weight: 3 },
+                { name: "1-Click return", desc: "Удобный возврат на сайт с 1-Click методов (Apple Pay, Google Pay)", priority: "Medium", weight: 3 }
             ],
             "3. Главная страница": [
-                { name: "Block configuration", desc: "Конфигурирование блоков через CMS без изменения кода: игры, баннеры, промо", priority: "High", weight: 4 },
-                { name: "Content segmentation", desc: "Разный контент для разных юзеров: VIP, новых, лояльных, по геолокации", priority: "High", weight: 4 },
-                { name: "Personalization", desc: "Персонализация по user attributes: история, поведение, язык, валюта", priority: "Medium", weight: 3 },
-                { name: "Localization", desc: "Полная локализация без изменения фронтенд-кода: язык, формат дат, валюта", priority: "High", weight: 4 }
+                { name: "Block configuration", desc: "Каждый основной homepage block может включаться/выключаться через CMS/configuration", priority: "High", weight: 4 },
+                { name: "Content segmentation", desc: "Сегментация по отображению контента для незарегистрированных/зарегистрированных пользователей", priority: "High", weight: 4 },
+                { name: "Content personalization", desc: "Контент может персонализироваться по user attributes / segment / GEO / campaign source", priority: "Medium", weight: 3 },
+                { name: "Localization", desc: "Контент и UI-элементы поддерживают локализацию без изменения frontend-кода", priority: "High", weight: 4 }
             ],
             "4. Форма регистрации": [
-                { name: "Traffic customization", desc: "Кастомизация формы под разные трафик-источники: landing pages, affiliate, SMS", priority: "High", weight: 4 },
-                { name: "Third-party compat", desc: "Работа на сторонних доменах и сайтах через embed/iframe", priority: "Medium", weight: 3 },
-                { name: "Format flexibility", desc: "Поддержка разных форматов: быстрая регистрация (email only), полная форма, социальные сети", priority: "Medium", weight: 3 },
-                { name: "Post-reg upsell", desc: "Апсейл возможности: Deposit, Play, Bonus на экранах после регистрации", priority: "Medium", weight: 3 }
+                { name: "Traffic customization", desc: "Адаптация формы под разные источники трафика/партнеров (UTM параметры)", priority: "High", weight: 4 },
+                { name: "Third-party compatibility", desc: "Корректная работа встроенной формы на сторонних доменах", priority: "Medium", weight: 3 },
+                { name: "Format flexibility", desc: "Выбор формата отображения формы регистрации: на отдельной страницы, в виде модального окна, короткая форма, длинная форма, предусмотрение дополнительных шагов", priority: "Medium", weight: 3 },
+                { name: "Post-reg upsell", desc: "Вариативность форматов апсейла при закрытии формы регистрации", priority: "Medium", weight: 3 }
             ],
             "5. Кассир": [
-                { name: "Product communications", desc: "Понятные коммуникации о комиссиях, ограничениях, сроках по каждому методу", priority: "High", weight: 4 },
-                { name: "UX streamlining", desc: "Минимум этапов: deposit за 1 клик, saved cards, mobile wallets", priority: "High", weight: 4 },
-                { name: "Withdrawal clarity", desc: "Ясные условия вывода: минимум, максимум, комиссия, сроки обработки", priority: "High", weight: 4 },
-                { name: "KYC flow", desc: "Простой KYC процесс: требуемые документы, быстрая проверка, апсейлы при лимитах", priority: "High", weight: 4 },
-                { name: "Support integration", desc: "Интеграция с саппортом: чат, tickets для помощи с платежами", priority: "Medium", weight: 3 }
+                { name: "Product communications", desc: "Продуктовые коммуникации через кассир: подсвечивание всех депозитных бонусов внутри кассира через фаст кнопки, динамическое отображение профита при вводе суммы, визуальная продажа бонуса", priority: "High", weight: 4 },
+                { name: "UX streamlining", desc: "Отсутствие лишних этапов/кликов в процессе депозита", priority: "High", weight: 4 },
+                { name: "Withdrawal clarity", desc: "Ясное отображение условий вывода и wagering requirements", priority: "High", weight: 4 },
+                { name: "KYC flow", desc: "KYC flow позволяет пользователю пройти необходимые проверки без лишних шагов и с понятным отображением текущего статуса и необходимых действий", priority: "High", weight: 4 },
+                { name: "Support integration", desc: "Возможность вызвать support или callback непосредственно из проблемного пользовательского flow без необходимости покидать текущий сценарий", priority: "Medium", weight: 3 }
             ],
             "6. Ивенты и трекинг": [
-                { name: "Event catalog", desc: "Полный каталог трекируемых events: регистрация, login, deposit, game play, bonus, withdrawal", priority: "Critical", weight: 5 },
-                { name: "Delay config", desc: "Настройка задержки доставки events для аналитики: real-time, 1 минута, 1 час", priority: "Medium", weight: 3 },
-                { name: "Real-time delivery", desc: "Минимальная задержка доставки events в аналитику: <1 сек для критических events", priority: "High", weight: 4 },
-                { name: "Event-driven flows", desc: "Event-driven архитектура UI: обновления основаны на server events, не на polling", priority: "High", weight: 4 },
-                { name: "Frontend tracking", desc: "Полная разметка фронтенда: клики, фреймворк events, ошибки JavaScript", priority: "High", weight: 4 },
-                { name: "Event segmentation", desc: "Сегментация events: по типу юзера, по игре, по стране, по источнику", priority: "Medium", weight: 3 }
+                { name: "Event catalog", desc: "Платформа имеет каталог доступных product events для передачи в кастомер для отображение модальных окон и коммуникации в рамках воронки на продукте", priority: "Critical", weight: 5 },
+                { name: "Delay configuration", desc: "Возможность настройки временной отложки для избежания наслаивания модальных окон", priority: "Medium", weight: 3 },
+                { name: "Real-time delivery", desc: "Live time передача ивентов с минимальной задержкой для задуманного отображения", priority: "High", weight: 4 },
+                { name: "Event-driven flows", desc: "Платформа позволяет использовать product events как условия для запуска, остановки или изменения пользовательских коммуникаций и UI-сценариев", priority: "High", weight: 4 },
+                { name: "Frontend tracking", desc: "Разметка фронта необходимыми ивентами на всех этапах в постхоге или аналоге", priority: "High", weight: 4 },
+                { name: "Event segmentation", desc: "Сегментация и разметка ивентов при передаче в BI", priority: "Medium", weight: 3 }
             ],
             "7. Аналитика": [
-                { name: "Analytics coverage", desc: "Покрытие всех funnels: регистрация, deposit, game play, retention, reactivation", priority: "High", weight: 4 },
-                { name: "Custom events", desc: "Возможность создавать custom events для специфических бизнес-метрик", priority: "Medium", weight: 3 },
-                { name: "Cohort analysis", desc: "Встроенные возможности для когорт-анализа: retention, LTV по когортам", priority: "Medium", weight: 3 },
-                { name: "Revenue attribution", desc: "Tracking revenue: source attribution, first touch vs last touch, contribution margin", priority: "High", weight: 4 }
+                { name: "Analytics coverage", desc: "Tracking всех key funnels: registration → deposit → play → withdrawal", priority: "High", weight: 4 },
+                { name: "Custom events", desc: "Возможность отправлять custom ивенты в analytics", priority: "Medium", weight: 3 },
+                { name: "Cohort analysis", desc: "Data позволяет строить когорты по дате первого депозита, источнику и т.д.", priority: "Medium", weight: 3 },
+                { name: "Revenue attribution", desc: "Корректное отслеживание revenue по источнику трафика/партнеру", priority: "High", weight: 4 }
             ],
             "8. Бонусный инструментарий": [
-                { name: "Bonus clarity", desc: "Ясные условия wagering: требуемый оборот, eligible games, сроки истечения", priority: "High", weight: 4 },
-                { name: "Game search", desc: "Фильтр и поиск игр: по провайдеру, типу (слоты, столы), по названию, популярности", priority: "Medium", weight: 3 },
-                { name: "Multi-stage", desc: "Multi-stage бонусы: раскрытие условий по этапам, прогресс-бар", priority: "High", weight: 4 },
-                { name: "Bonus cancellation", desc: "Возможность отмены бонуса: явная кнопка отмены, сохранение funds отдельно", priority: "High", weight: 4 },
-                { name: "FS crediting", desc: "Различные варианты зачисления FS: сразу в игру, в кошелек, поэтапно", priority: "High", weight: 4 },
-                { name: "Multi-bonus stack", desc: "Поддержка наложения бонусов: несколько активных бонусов одновременно, правильные расчеты", priority: "Medium", weight: 3 }
+                { name: "Bonus clarity", desc: "Понятное и наглядное отображение условий wagering и прогресса", priority: "High", weight: 4 },
+                { name: "Game search", desc: "Поиск и фильтр подходящих игр для отыгрыша (по RTP, типу)", priority: "Medium", weight: 3 },
+                { name: "Multi-stage bonuses", desc: "Корректная работа multi-stage bonuses (первый, второй депозит и т.д.)", priority: "High", weight: 4 },
+                { name: "Bonus cancellation", desc: "Отсутствие ошибок при отмене бонуса, начислении бонуса на разные балансы", priority: "High", weight: 4 },
+                { name: "FS instant crediting", desc: "Моментальное зачисление выигрышей после FS на основной баланс", priority: "High", weight: 4 },
+                { name: "Multi-bonus stacking", desc: "Понятное отображение и управление при наложении нескольких бонусов", priority: "Medium", weight: 3 }
             ],
             "9. Программа лояльности": [
-                { name: "Loyalty area", desc: "Единое место для лояльности: VIP status, тир-прогрессия, rewards, персональные предложения", priority: "High", weight: 4 },
-                { name: "Rewards variety", desc: "Разнообразие rewards: бонусы, cashback, FS, перки, эксклюзивные события", priority: "High", weight: 4 },
-                { name: "Notifications", desc: "Своевременные уведомления: tier progression, rewards, персональные предложения, опционально push", priority: "Medium", weight: 3 }
+                { name: "Loyalty rewards area", desc: "Все доступные loyalty rewards доступны из единой loyalty area", priority: "High", weight: 4 },
+                { name: "Rewards variety", desc: "Регулярные и привлекательные бонусы (рейкбэк, кэшбэк, колеса фортуны и тл) по выбранному промежутку времени, условиям", priority: "High", weight: 4 },
+                { name: "Reward notifications", desc: "Своевременное уведомление об получении награды / достижении майл-стоунов", priority: "Medium", weight: 3 }
             ],
             "10. Приложения": [
-                { name: "APK version", desc: "Native APK приложение для Android: полная функциональность, push notifications", priority: "Medium", weight: 3 },
-                { name: "PWA", desc: "Progressive Web App: install как app, offline mode, push notifications", priority: "Medium", weight: 3 },
-                { name: "iOS app", desc: "Native iOS приложение или Web App в TestFlight: соответствие App Store гайдлайнам", priority: "Medium", weight: 3 },
-                { name: "Push notifications", desc: "Push уведомления: deposit reminders, game launches, promotions, правильная доставка", priority: "Medium", weight: 3 }
+                { name: "APK version", desc: "Доступна готовая APK-версия продукта", priority: "Medium", weight: 3 },
+                { name: "PWA", desc: "PWA с offline functionality и push notifications", priority: "Medium", weight: 3 },
+                { name: "iOS app", desc: "Native iOS приложение на App Store", priority: "Medium", weight: 3 },
+                { name: "Push notifications", desc: "Работающие push notifications (не спам, relevant) внутри приложения", priority: "Medium", weight: 3 }
             ]
         };
 
         let evaluations = {};
         let currentEvaluation = {};
+        let deleteKey = null;
 
         function initEvaluations() {
             const saved = localStorage.getItem('platformEvaluations');
@@ -329,9 +331,9 @@
         function savePlatformEvaluation() {
             const evaluator = document.getElementById("evaluator-name").value.trim() || "Anonymous";
             const platformName = document.getElementById("platform-name").value.trim() || "Platform 1";
-            
+
             if (!evaluator || !platformName) {
-                alert("Fill in name and platform!");
+                alert("Заполните имя и платформу!");
                 return;
             }
 
@@ -347,7 +349,7 @@
             updateDashboardSelector();
             renderComparisonTab();
             showSuccessMessage();
-            
+
             document.getElementById("evaluator-name").value = "";
             document.getElementById("platform-name").value = "";
         }
@@ -355,7 +357,7 @@
         function updateDashboardSelector() {
             const selector = document.getElementById("dashboard-selector");
             selector.innerHTML = '<option value="">-- Select --</option>';
-            
+
             Object.keys(evaluations).forEach(key => {
                 const eval_data = evaluations[key];
                 const option = document.createElement("option");
@@ -410,6 +412,7 @@
                                         <option value="5" ${score === 5 ? 'selected' : ''}>5</option>
                                     </select>
                                     <div class="score-tooltip" style="display:none;">
+                                        <div><strong>Оценки:</strong></div>
                                         <div>1: ${scoreDescriptors[item.name]?.[1]}</div>
                                         <div>2: ${scoreDescriptors[item.name]?.[2]}</div>
                                         <div>3: ${scoreDescriptors[item.name]?.[3]}</div>
@@ -482,7 +485,7 @@
 
             const overall = calculateOverallScore();
             document.getElementById("overall-score").textContent = overall.toFixed(2);
-            
+
             let criticalGaps = 0, strongPoints = 0;
             const scoreCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
@@ -509,7 +512,7 @@
         function renderSectionScores() {
             const container = document.getElementById("section-scores-container");
             const sectionScores = {};
-            
+
             Object.entries(criteria).forEach(([section, items]) => {
                 let sectionWeighted = 0, sectionWeight = 0;
                 items.forEach((item, idx) => {
@@ -521,7 +524,7 @@
             });
 
             const sorted = Object.entries(sectionScores).sort((a, b) => b[1].score - a[1].score);
-            
+
             container.innerHTML = "<div style='font-weight: 600; margin-bottom: 15px; color: #667eea;'>Section Scores (Ranked)</div>";
             sorted.forEach(([section, data]) => {
                 const barWidth = (data.score / 5) * 100;
@@ -571,7 +574,7 @@
         function renderComparisonTab() {
             const container = document.getElementById("evaluations-list");
             if (Object.keys(evaluations).length === 0) {
-                container.innerHTML = '<div class="info-box">No saved evaluations yet. Fill in and save an evaluation first.</div>';
+                container.innerHTML = '<div class="info-box">Нет сохраненных оценок. Заполни и сохрани оценку.</div>';
                 updateSelectedCount();
                 return;
             }
@@ -626,7 +629,6 @@
             updateSelectedCount();
         }
 
-        let deleteKey = null;
         function openDeleteModal(key) {
             deleteKey = key;
             document.getElementById('delete-modal').style.display = 'flex';
@@ -656,20 +658,14 @@
             }
 
             const resultContainer = document.getElementById('comparison-result');
-            resultContainer.innerHTML = '';
-
-            const sections = Object.keys(criteria).map(s => s.replace(/^\d+\. /, ""));
-            let html = `<div style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;">
+            let html = `<div class="comparison-result">
                 <h3 style="margin-bottom: 15px; color: #667eea;">Сравнение по Section Scores</h3>
-                <div class="table-wrapper">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead style="background: #f5f5f5;">
-                        <tr>
-                            <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd; color: #333;">Раздел</th>`;
+                <table class="comparison-table">
+                    <thead><tr><th style="color: #333;">Раздел</th>`;
 
             checked.forEach(key => {
                 const eval_data = evaluations[key];
-                html += `<th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd; color: #333;">${eval_data.platform}<br><span style="font-size: 11px; color: #666;">${eval_data.evaluator}</span></th>`;
+                html += `<th style="color: #333;">${eval_data.platform}<br><span style="font-size: 11px; color: #666;">${eval_data.evaluator}</span></th>`;
             });
 
             html += `</tr></thead><tbody>`;
@@ -677,7 +673,7 @@
             const totals = checked.map(() => 0);
 
             Object.entries(criteria).forEach(([section, items]) => {
-                html += `<tr><td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #333;">${section}</td>`;
+                html += `<tr><td style="text-align: left; color: #333;">${section}</td>`;
 
                 checked.forEach((key, idx) => {
                     const eval_data = evaluations[key];
@@ -691,26 +687,20 @@
                     totals[idx] += avgScore;
                     const score = sectionWeight > 0 ? avgScore.toFixed(2) : '—';
                     const color = score === '—' ? '#ccc' : score >= 4 ? '#4caf50' : score >= 3 ? '#ffc107' : '#f44336';
-                    html += `<td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee; color: ${color}; font-weight: 600;">${score}</td>`;
+                    html += `<td style="color: ${color}; font-weight: 600;">${score}</td>`;
                 });
 
                 html += `</tr>`;
             });
 
-            html += `<tr style="background: #f9f9f9; font-weight: 600;"><td style="padding: 12px; border-top: 2px solid #ddd; color: #333;">TOTAL SCORE</td>`;
+            html += `<tr style="background: #f9f9f9; font-weight: 600;"><td style="border-top: 2px solid #ddd; color: #333;">TOTAL SCORE</td>`;
             checked.forEach((key, idx) => {
                 const totalScore = (totals[idx] / Object.keys(criteria).length).toFixed(2);
                 const color = totalScore >= 4 ? '#4caf50' : totalScore >= 3 ? '#ffc107' : '#f44336';
-                html += `<td style="padding: 12px; text-align: center; border-top: 2px solid #ddd; color: ${color}; font-weight: 600;">${totalScore}</td>`;
+                html += `<td style="border-top: 2px solid #ddd; color: ${color}; font-weight: 600;">${totalScore}</td>`;
             });
-            html += `</tr>`;
-
-            html += `</tbody></table></div></div>`;
+            html += `</tr></tbody></table></div>`;
             resultContainer.innerHTML = html;
-        }
-
-        function closeViewModal() {
-            document.getElementById('view-modal').style.display = 'none';
         }
 
         function calculateScoreForEval(evalData) {
@@ -801,11 +791,11 @@
                         <table style="width: 100%; border-collapse: collapse;">
                             <thead style="background: #f5f5f5;">
                                 <tr>
-                                    <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd;">Критерий</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd;">Score</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd;">Weight</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd;">Weighted</th>
-                                    <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd;">Комментарий</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd; color: #333;">Критерий</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd; color: #333;">Score</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd; color: #333;">Weight</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd; color: #333;">Weighted</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd; color: #333;">Комментарий</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -837,13 +827,16 @@
             document.getElementById('view-title').textContent = `${eval_data.platform} — ${eval_data.evaluator}`;
             document.getElementById('view-content').innerHTML = html;
             document.getElementById('view-modal').style.display = 'block';
-            document.getElementById('view-modal').scrollTop = 0;
+        }
+
+        function closeViewModal() {
+            document.getElementById('view-modal').style.display = 'none';
         }
 
         function downloadEvaluationExcel(key) {
             const eval_data = evaluations[key];
             const wb = XLSX.utils.book_new();
-            
+
             const data = [["Section", "Criterion", "Score", "Weighted Score", "Weight", "Comment"]];
             Object.entries(criteria).forEach(([section, items]) => {
                 items.forEach((item, idx) => {
@@ -860,7 +853,7 @@
 
         function exportToExcel() {
             const wb = XLSX.utils.book_new();
-            
+
             const data = [["Section", "Criterion", "Description", "Priority", "Weight", "Score", "Weighted Score", "Comment"]];
             Object.entries(criteria).forEach(([section, items]) => {
                 items.forEach((item, idx) => {
@@ -880,7 +873,7 @@
             document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
             document.getElementById(tab).classList.add("active");
             event.target?.classList.add("active");
-            
+
             if (tab === 'comparison') renderComparisonTab();
             if (tab === 'dashboard') renderDashboard();
         }
