@@ -152,6 +152,7 @@
             <div class="info-box">Все сохраненные оценки. Сравнивай разные версии и оценивающих.</div>
             <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
                 <button id="compare-btn" onclick="compareSelectedEvaluations()" style="background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: none;">📊 Сравнить выбранные</button>
+                <button id="clear-btn" onclick="clearSelectedEvaluations()" style="background: #f5f5f5; color: #333; padding: 10px 20px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: 600; display: none;">✕ Очистить выбор</button>
                 <span id="selected-count" style="font-size: 12px; color: #999;"></span>
             </div>
             <div id="comparison-result" style="margin-bottom: 20px;"></div>
@@ -189,7 +190,52 @@
             "Core flows stability": { 1: "Множество ошибок", 2: "Часто ошибки", 3: "Редко", 4: "Стабильно", 5: "Идеально" },
             "Mirror rotation": { 1: "Нет ротации", 2: "Нестабильно", 3: "С задержками", 4: "Хорошо", 5: "Идеально" },
             "Session persistence": { 1: "Теряется", 2: "Часто", 3: "Иногда", 4: "Обычно", 5: "Всегда" },
-            "Frontend performance": { 1: ">5s", 2: "4-5s", 3: "3-4s", 4: "<3s", 5: "<2s" }
+            "Frontend performance": { 1: ">5s", 2: "4-5s", 3: "3-4s", 4: "<3s", 5: "<2s" },
+            "Mobile scenarios": { 1: "Не работает", 2: "Множество ошибок", 3: "Работает с проблемами", 4: "Хорошо", 5: "Идеально" },
+            "Game providers": { 1: "1-2 провайдера", 2: "3 провайдера", 3: "4 провайдера", 4: "5+ провайдеров", 5: "Все основные" },
+            "Bonus accuracy": { 1: "Частые ошибки", 2: "Редкие ошибки", 3: "Почти правильно", 4: "Правильно", 5: "100% точно" },
+            "Card payment UI": { 1: "Нет своего UI", 2: "UI с редиректом", 3: "Свой UI но неполный", 4: "Свой UI полный", 5: "Продвинутый UI" },
+            "Player data mapping": { 1: "Ошибки в маппинге", 2: "Неполное маппирование", 3: "Маппирование есть", 4: "Правильное маппирование", 5: "Идеальное маппирование" },
+            "Fallback routing": { 1: "Нет fallback", 2: "Один fallback", 3: "Два fallback", 4: "Три+ fallback", 5: "Автоматический выбор" },
+            "Open Banking": { 1: "Нет", 2: "1 провайдер", 3: "2-3 провайдера", 4: "4-5 провайдеров", 5: "5+ провайдеров" },
+            "Retry on failure": { 1: "Нет", 2: "Ручной retry", 3: "Один автоretry", 4: "Несколько retry", 5: "Оптимальная стратегия" },
+            "1-Click return": { 1: "Нет", 2: "Требует подтверждение", 3: "1-Click но ограничено", 4: "1-Click работает", 5: "1-Click оптимизировано" },
+            "Block configuration": { 1: "Только в коде", 2: "Через админ панель", 3: "Простая CMS", 4: "Полная CMS", 5: "Продвинутая CMS" },
+            "Content segmentation": { 1: "Нет", 2: "По типу юзера", 3: "По нескольким атрибутам", 4: "По многим атрибутам", 5: "Полная персонализация" },
+            "Personalization": { 1: "Нет", 2: "Минимальная", 3: "Частичная", 4: "Хорошая", 5: "Полная" },
+            "Localization": { 1: "Только英語", 2: "2-3 языка", 3: "5+ языков", 4: "10+ языков", 5: "Полная локализация" },
+            "Traffic customization": { 1: "Нет", 2: "Фиксированные варианты", 3: "Несколько вариантов", 4: "Много вариантов", 5: "Полная кастомизация" },
+            "Third-party compat": { 1: "Не работает", 2: "С проблемами", 3: "Частично работает", 4: "Хорошо работает", 5: "Идеально" },
+            "Format flexibility": { 1: "Один формат", 2: "Два формата", 3: "Три формата", 4: "Четыре+ форматов", 5: "Любой формат" },
+            "Post-reg upsell": { 1: "Нет", 2: "Один вариант", 3: "Два варианта", 4: "Три варианта", 5: "Продвинутые апсейлы" },
+            "Product communications": { 1: "Нет информации", 2: "Неполная информация", 3: "Базовая информация", 4: "Полная информация", 5: "Отличные коммуникации" },
+            "UX streamlining": { 1: "5+ шагов", 2: "4 шага", 3: "3 шага", 4: "2 шага", 5: "1 клик" },
+            "Withdrawal clarity": { 1: "Неясные условия", 2: "Частично ясно", 3: "Более или менее ясно", 4: "Ясные условия", 5: "Кристально ясно" },
+            "KYC flow": { 1: "Сложно", 2: "Средне", 3: "Приемлемо", 4: "Просто", 5: "Очень просто" },
+            "Support integration": { 1: "Нет", 2: "Email только", 3: "Email + FAQ", 4: "Чат + Email", 5: "24/7 поддержка" },
+            "Event catalog": { 1: "Нет events", 2: "5-10 events", 3: "10-20 events", 4: "20-50 events", 5: "50+ events" },
+            "Delay config": { 1: "Нет", 2: "Fixed delay", 3: "Несколько опций", 4: "Гибкие опции", 5: "Полный контроль" },
+            "Real-time delivery": { 1: ">10сек", 2: "5-10сек", 3: "1-5сек", 4: "<1сек", 5: "<100ms" },
+            "Event-driven flows": { 1: "Polling только", 2: "Частично events", 3: "Основано на events", 4: "Полностью event-driven", 5: "Оптимизированный" },
+            "Frontend tracking": { 1: "Нет разметки", 2: "Базовая разметка", 3: "Средняя разметка", 4: "Полная разметка", 5: "Продвинутая разметка" },
+            "Event segmentation": { 1: "Нет", 2: "По типу", 3: "По типу и стране", 4: "По многим параметрам", 5: "Полная сегментация" },
+            "Analytics coverage": { 1: "1-2 funnel", 2: "3-4 funnel", 3: "5-6 funnel", 4: "7-8 funnel", 5: "Все funnel" },
+            "Custom events": { 1: "Нет", 2: "Ограничено", 3: "Несколько опций", 4: "Хорошо", 5: "Полная свобода" },
+            "Cohort analysis": { 1: "Нет", 2: "Базовое", 3: "Среднее", 4: "Хорошее", 5: "Продвинутое" },
+            "Revenue attribution": { 1: "Нет", 2: "Базовое", 3: "Среднее", 4: "Правильное", 5: "Продвинутое" },
+            "Bonus clarity": { 1: "Неясные условия", 2: "Частично ясно", 3: "Более ясно", 4: "Ясные условия", 5: "Очень ясно" },
+            "Game search": { 1: "Нет поиска", 2: "Поиск по названию", 3: "Поиск + базовые фильтры", 4: "Развитые фильтры", 5: "Продвинутый поиск" },
+            "Multi-stage": { 1: "Нет", 2: "Два этапа", 3: "Три этапа", 4: "Четыре этапа", 5: "Более четырех" },
+            "Bonus cancellation": { 1: "Нельзя отменить", 2: "Сложная отмена", 3: "Можно отменить", 4: "Легко отменить", 5: "1-Click отмена" },
+            "FS crediting": { 1: "Нет FS", 2: "В игру только", 3: "В кошелек или игру", 4: "Гибкое зачисление", 5: "Полная гибкость" },
+            "Multi-bonus stack": { 1: "Нельзя комбинировать", 2: "Два бонуса", 3: "Три бонуса", 4: "Четыре бонуса", 5: "Неограниченно" },
+            "Loyalty area": { 1: "Нет", 2: "Простая страница", 3: "Базовая функциональность", 4: "Хорошая функциональность", 5: "Полнофункциональная" },
+            "Rewards variety": { 1: "Один тип", 2: "Два типа", 3: "Три типа", 4: "Четыре типа", 5: "Пять+ типов" },
+            "Notifications": { 1: "Нет", 2: "Email только", 3: "Email + в-app", 4: "Email + в-app + SMS", 5: "Email + в-app + SMS + Push" },
+            "APK version": { 1: "Нет", 2: "Устаревшая версия", 3: "Обновляется редко", 4: "Обновляется регулярно", 5: "Всегда актуальна" },
+            "PWA": { 1: "Нет", 2: "Базовое", 3: "Среднее", 4: "Хорошее", 5: "Отличное" },
+            "iOS app": { 1: "Нет", 2: "Web wrapper", 3: "Полуnative", 4: "Native app", 5: "Optimized native" },
+            "Push notifications": { 1: "Нет", 2: "Нестабильные", 3: "Работают", 4: "Хорошо работают", 5: "Идеально работают" }
         };
 
         const criteria = {
@@ -558,15 +604,26 @@
 
         function updateSelectedCount() {
             const checked = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).length;
-            const btn = document.getElementById('compare-btn');
+            const compareBtn = document.getElementById('compare-btn');
+            const clearBtn = document.getElementById('clear-btn');
             const counter = document.getElementById('selected-count');
             if (checked > 1) {
-                btn.style.display = 'block';
+                compareBtn.style.display = 'block';
+                clearBtn.style.display = 'block';
                 counter.textContent = `Выбрано: ${checked}`;
             } else {
-                btn.style.display = 'none';
+                compareBtn.style.display = 'none';
+                clearBtn.style.display = 'none';
                 counter.textContent = '';
             }
+        }
+
+        function clearSelectedEvaluations() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            document.getElementById('comparison-result').innerHTML = '';
+            updateSelectedCount();
         }
 
         let deleteKey = null;
@@ -608,33 +665,45 @@
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead style="background: #f5f5f5;">
                         <tr>
-                            <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd;">Раздел</th>`;
+                            <th style="padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #ddd; color: #333;">Раздел</th>`;
 
             checked.forEach(key => {
                 const eval_data = evaluations[key];
-                html += `<th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd;">${eval_data.platform}<br><span style="font-size: 11px; color: #999;">${eval_data.evaluator}</span></th>`;
+                html += `<th style="padding: 12px; text-align: center; font-weight: 600; border-bottom: 1px solid #ddd; color: #333;">${eval_data.platform}<br><span style="font-size: 11px; color: #666;">${eval_data.evaluator}</span></th>`;
             });
 
             html += `</tr></thead><tbody>`;
 
-            Object.entries(criteria).forEach(([section, items]) => {
-                html += `<tr><td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600;">${section}</td>`;
+            const totals = checked.map(() => 0);
 
-                checked.forEach(key => {
+            Object.entries(criteria).forEach(([section, items]) => {
+                html += `<tr><td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #333;">${section}</td>`;
+
+                checked.forEach((key, idx) => {
                     const eval_data = evaluations[key];
                     let sectionWeighted = 0, sectionWeight = 0;
-                    items.forEach((item, idx) => {
-                        const score = eval_data.data[section]?.[idx]?.score || 0;
+                    items.forEach((item, itemIdx) => {
+                        const score = eval_data.data[section]?.[itemIdx]?.score || 0;
                         sectionWeighted += score * item.weight;
                         sectionWeight += item.weight;
                     });
-                    const avgScore = sectionWeight > 0 ? (sectionWeighted / sectionWeight).toFixed(2) : '—';
-                    const color = avgScore === '—' ? '#ccc' : avgScore >= 4 ? '#4caf50' : avgScore >= 3 ? '#ffc107' : '#f44336';
-                    html += `<td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee; color: ${color}; font-weight: 600;">${avgScore}</td>`;
+                    const avgScore = sectionWeight > 0 ? (sectionWeighted / sectionWeight) : 0;
+                    totals[idx] += avgScore;
+                    const score = sectionWeight > 0 ? avgScore.toFixed(2) : '—';
+                    const color = score === '—' ? '#ccc' : score >= 4 ? '#4caf50' : score >= 3 ? '#ffc107' : '#f44336';
+                    html += `<td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee; color: ${color}; font-weight: 600;">${score}</td>`;
                 });
 
                 html += `</tr>`;
             });
+
+            html += `<tr style="background: #f9f9f9; font-weight: 600;"><td style="padding: 12px; border-top: 2px solid #ddd; color: #333;">TOTAL SCORE</td>`;
+            checked.forEach((key, idx) => {
+                const totalScore = (totals[idx] / Object.keys(criteria).length).toFixed(2);
+                const color = totalScore >= 4 ? '#4caf50' : totalScore >= 3 ? '#ffc107' : '#f44336';
+                html += `<td style="padding: 12px; text-align: center; border-top: 2px solid #ddd; color: ${color}; font-weight: 600;">${totalScore}</td>`;
+            });
+            html += `</tr>`;
 
             html += `</tbody></table></div></div>`;
             resultContainer.innerHTML = html;
@@ -660,6 +729,16 @@
             const eval_data = evaluations[key];
             currentEvaluation = JSON.parse(JSON.stringify(eval_data.data));
 
+            const overall = calculateOverallScore();
+            let criticalGaps = 0, strongPoints = 0;
+            Object.entries(criteria).forEach(([section, items]) => {
+                items.forEach((item, idx) => {
+                    const score = currentEvaluation[section]?.[idx]?.score || 0;
+                    if (score <= 2) criticalGaps++;
+                    if (score >= 4) strongPoints++;
+                });
+            });
+
             let html = `
                 <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #eee;">
                     <h2 style="color: #333; margin-bottom: 10px;">${eval_data.platform}</h2>
@@ -667,14 +746,54 @@
                 </div>
 
                 <div style="margin-bottom: 30px;">
-                    <h3 style="color: #667eea; margin-bottom: 15px;">Общие показатели</h3>
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Dashboard</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
                         <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 28px; font-weight: bold; color: #667eea;">${calculateOverallScore().toFixed(2)}</div>
+                            <div style="font-size: 28px; font-weight: bold; color: #667eea;">${overall.toFixed(2)}</div>
                             <div style="font-size: 12px; color: #999; margin-top: 5px;">Overall Score</div>
+                        </div>
+                        <div style="background: #ffebee; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 28px; font-weight: bold; color: #f44336;">${criticalGaps}</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 5px;">Critical Gaps</div>
+                        </div>
+                        <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 28px; font-weight: bold; color: #4caf50;">${strongPoints}</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 5px;">Strong Points</div>
                         </div>
                     </div>
                 </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Section Scores (Ranked)</h3>`;
+
+            const sectionScores = {};
+            Object.entries(criteria).forEach(([section, items]) => {
+                let sectionWeighted = 0, sectionWeight = 0;
+                items.forEach((item, idx) => {
+                    const score = currentEvaluation[section]?.[idx]?.score || 0;
+                    sectionWeighted += score * item.weight;
+                    sectionWeight += item.weight;
+                });
+                sectionScores[section] = { score: sectionWeight > 0 ? (sectionWeighted / sectionWeight) : 0, weighted: sectionWeighted.toFixed(2) };
+            });
+
+            const sorted = Object.entries(sectionScores).sort((a, b) => b[1].score - a[1].score);
+            sorted.forEach(([section, data]) => {
+                const barWidth = (data.score / 5) * 100;
+                html += `
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <div style="font-size: 13px; font-weight: 600; color: #333;">${section}</div>
+                            <div style="font-size: 13px; font-weight: 600; color: #667eea;">${data.score.toFixed(2)}</div>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: #eee; border-radius: 4px; overflow: hidden;">
+                            <div style="width: ${barWidth}%; height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>
 
                 <div style="margin-bottom: 30px;">
                     <h3 style="color: #667eea; margin-bottom: 15px;">Детальные оценки по критериям</h3>
