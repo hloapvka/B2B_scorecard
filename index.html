@@ -1002,23 +1002,46 @@
                         // Декодируем JSON обратно
                         try {
                             currentEvaluation = JSON.parse(data.data);
-                            document.getElementById("evaluator-name").value = data.evaluator;
-                            document.getElementById("platform-name").value = data.platform;
+                            const evaluator = data.evaluator;
+                            const platform = data.platform;
+                            const timestamp = data.timestamp;
+
+                            // Заполняем поля ввода (они будут предзаполнены но не редактируемы)
+                            const nameInput = document.getElementById("evaluator-name");
+                            const platformInput = document.getElementById("platform-name");
+                            nameInput.value = evaluator;
+                            platformInput.value = platform;
+                            nameInput.disabled = true;
+                            platformInput.disabled = true;
+
+                            // Скрываем кнопки Save & Share (оценка уже сохранена)
+                            const shareBtn = document.querySelector('button[onclick="shareEvaluation()"]');
+                            const saveBtn = document.querySelector('button[onclick="savePlatformEvaluation()"]');
+                            if (shareBtn) shareBtn.style.display = 'none';
+                            if (saveBtn) saveBtn.style.display = 'none';
+
+                            // Рендерим на всех вкладках
                             renderEvaluationTable();
                             renderComparisonTab();
                             renderDashboard();
 
+                            // Обновляем информационное сообщение
                             const msg = document.querySelector('.info-box');
                             if (msg) {
-                                msg.innerHTML = `✅ <strong>Загружена оценка ${data.evaluator}</strong> для платформы <strong>${data.platform}</strong><br>Сделана: ${data.timestamp}`;
+                                msg.innerHTML = `✅ <strong>Просмотр оценки ${evaluator}</strong> для платформы <strong>${platform}</strong><br>Сделана: ${timestamp}<br><em>Это общая оценка - доступна всем по ссылке</em>`;
                                 msg.style.background = '#e8f5e9';
                                 msg.style.borderLeftColor = '#4caf50';
                                 msg.style.color = '#2e7d32';
                             }
+
+                            console.log("✅ Evaluation loaded from Firebase:", {evaluator, platform, timestamp});
                         } catch (e) {
                             console.error("Error parsing evaluation data:", e);
-                            alert("❌ Ошибка при загрузке оценки");
+                            alert("❌ Ошибка при загрузке оценки: " + e.message);
                         }
+                    } else {
+                        console.log("Evaluation not found:", evalId);
+                        alert("⚠️ Оценка не найдена. Проверь ссылку.");
                     }
                 });
             }
