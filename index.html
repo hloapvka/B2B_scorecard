@@ -412,13 +412,19 @@
             let currentSection = "";
 
             Object.entries(criteria).forEach(([section, items]) => {
-                let sectionTotal = 0, sectionWeightTotal = 0;
+                let sectionScoreSum = 0, sectionScoreCount = 0;
+                let sectionWeightedSum = 0, sectionWeightTotal = 0;
 
                 items.forEach((item, idx) => {
                     const score = currentEvaluation[section]?.[idx]?.score || 0;
                     const comment = currentEvaluation[section]?.[idx]?.comment || "";
                     const weighted = (score * item.weight).toFixed(2);
-                    sectionTotal += score * item.weight;
+
+                    if (score > 0) {
+                        sectionScoreSum += score;
+                        sectionScoreCount++;
+                    }
+                    sectionWeightedSum += score * item.weight;
                     sectionWeightTotal += item.weight;
 
                     const descriptor = scoreDescriptors[item.name]?.[score] || '';
@@ -471,13 +477,15 @@
                     currentSection = section;
                 });
 
-                const avgScore = sectionWeightTotal > 0 ? (sectionTotal / sectionWeightTotal).toFixed(2) : "—";
+                const avgScoreSimple = sectionScoreCount > 0 ? (sectionScoreSum / sectionScoreCount).toFixed(2) : "—";
+                const avgScoreWeighted = sectionWeightTotal > 0 ? (sectionWeightedSum / sectionWeightTotal).toFixed(2) : "—";
+
                 tbody.innerHTML += `
                     <tr class="section-total">
-                        <td colspan="2"><strong>${section} Total</strong></td>
+                        <td colspan="2"><strong>${section} Total / AVG</strong></td>
                         <td></td><td></td><td><strong>${sectionWeightTotal}</strong></td>
-                        <td style="text-align: center;"><strong>${avgScore}</strong></td>
-                        <td style="text-align: center;"><strong>${sectionTotal.toFixed(2)}</strong></td>
+                        <td style="text-align: center;"><strong>${sectionScoreSum} / ${avgScoreSimple}</strong></td>
+                        <td style="text-align: center;"><strong>${sectionWeightedSum.toFixed(2)} / ${avgScoreWeighted}</strong></td>
                         <td></td>
                     </tr>
                 `;
